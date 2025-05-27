@@ -1,0 +1,5 @@
+basic-app/
+basic-navigation/
+first-dashboard/__pycache_/*
+lib/
+lib64/

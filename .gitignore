@@ -1,5 +1,6 @@
 basic-app/
 basic-navigation/
-first-dashboard/__pycache_/*
+first-dashboard/__pycache__/
 lib/
 lib64/
+pyvenv.cfg

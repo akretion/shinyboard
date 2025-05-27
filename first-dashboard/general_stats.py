@@ -7,30 +7,31 @@ from shared import hr_data
 
 
 @module.ui
-def page():
+def gen_stat_page():
     return ui.page_fluid(
         ui.column(12,
             ui.h2("Statistiques Générales")
         ),
+        ui.row(
+            ui.column(5,
+                ui.card(
+                    ui.card_header( ui.output_text("getMostKnownSkill") ),
+                    ui.card_footer(" est la compétence la plus maîtrisée")
+                )
+            ),
 
-        ui.column(6,
-            ui.card(
-                ui.card_header( ui.output_text("getMostKnownSkill") ),
-                ui.card_footer(" est la compétence la plus maîtrisée")
-            )
-        ),
-
-        ui.column(6,
-            ui.card(
-                ui.card_header( ui.output_text("getLeastKnownSkill") ),
-                ui.card_footer(" est la compétence la moins maîtrisée")
+            ui.column(5,
+                ui.card(
+                    ui.card_header( ui.output_text("getLeastKnownSkill") ),
+                    ui.card_footer(" est la compétence la moins maîtrisée")
+                )
             )
         )
     )
 
 
 @module.server
-def server(input, output, session):
+def gen_stat_server(input, output, session):
 # MOST KNOWN SKILL
     @render.text
     def getMostKnownSkill():

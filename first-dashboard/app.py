@@ -5,7 +5,7 @@ from faicons import icon_svg
 from shiny import App, ui
 
 # Data
-from shared import hr_data
+from shared import hr_employee_skill
 
 
 # Pages

@@ -4,8 +4,11 @@ import polars as pl
 
 from shiny import App, ui, reactive, render, module
 
-from shared import hr_data
-columns = hr_data.get_column("skill_id").to_list()
+from shared import hr_employee_skill
+from shared import placeholder_plot, placeholder_text
+columns = hr_employee_skill.get_column("skill_id").to_list()
+
+
 
 
 @module.ui
@@ -44,21 +47,16 @@ def interactive_stats_server(input, output, session):
         Its purpose is to make data available for the front to take (via inputs)
     """
 
-# PLACEHOLDERS
-
-    placeholder_text = "Pas encore implémenté !"
-    placeholder_plot = plt.bar(5, 10, width=0.8, bottom=None, align='center', data=None)
-
 # TOTAL EMPLOYEE COUNT
     def getTotalEmployeeCount():
-        return f"{hr_data.select("employee_id").count().get_column("employee_id")[0]}"
+        return f"{hr_employee_skill.select("employee_id").count().get_column("employee_id")[0]}"
         
     
 # AVG OF PEOPLE WITH A SKILL
     @reactive.calc
     def getCountPeopleWithSkill():
 
-        ppl_with_skill = hr_data.select("employee_id", "skill_id").filter(
+        ppl_with_skill = hr_employee_skill.select("employee_id", "skill_id").filter(
             pl.col("skill_id").eq(int(input.skill_id()))
             ).count().get_column("employee_id")[0]
         
@@ -71,6 +69,7 @@ def interactive_stats_server(input, output, session):
 # People per skills
     @reactive.calc
     def getPeoplePerSkills() -> plt.plot:
+
         return placeholder_plot
     
     @render.plot

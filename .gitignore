@@ -176,6 +176,9 @@ cython_debug/
 basic-app/
 basic-navigation/
 first-dashboard/__pycache__/
-lib/
+bin/
+etc/
 lib64/
+include/
+share/
 pyvenv.cfg

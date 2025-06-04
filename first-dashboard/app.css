@@ -1,0 +1,50 @@
+
+
+:root {
+    --accent-color: rgb(137, 81, 217);
+    --accent-active: rgb(89, 52, 140);
+    --accent-hover: rgb(155, 87, 250);
+}
+
+/* GENERAL UI ELEMENTS */
+
+.navbar-brand {
+    color: white !important;
+}
+
+.card-header {
+    background-color: var(--accent-color) !important;
+    color: white
+}
+
+.navbar, .nav-link {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+.nav-link.active {
+    background-color: var(--accent-active) !important;
+    color: white !important;
+}
+
+.nav-link:hover {
+    background-color: var(--accent-hover) !important;
+    color: white !important;
+}
+
+.irs-bar, .irs-handle, .irs-to, .irs-from {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+
+/* DATAFRAMES TABLES */
+
+th {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+}
+
+th:hover {
+    background-color: var(--accent-hover) !important;
+}

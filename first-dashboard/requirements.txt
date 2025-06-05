@@ -1,5 +1,8 @@
 faicons
+connectorx
+pyarrow
 shiny
 seaborn
 pandas
 polars
+ruff

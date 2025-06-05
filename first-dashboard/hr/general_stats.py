@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import json
 
 # Data import
-from hr.hr_data import getHRData, hr_data_model
+from hr.hr_data import getHRData, Hr_data_model
 from shared import placeholder_plot, placeholder_text
 
 

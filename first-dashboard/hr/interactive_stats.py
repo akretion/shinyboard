@@ -3,7 +3,8 @@ import polars as pl
 
 from shiny import App, ui, reactive, render, module
 
-from hr.hr_data import getHRData, hr_data_model
+from hr.hr_data import getHRData
+from models.hr_data_model import Hr_data_model
 from shared import placeholder_plot, placeholder_text
 import json
 
@@ -14,7 +15,7 @@ hr_data = getHRData()
 def interactive_stats_page():
     return ui.page_sidebar(
         ui.sidebar(
-            ui.h2("Informations"),
+            ui.h2("Critères de tri"),
             ui.input_select(
                 "skill_name",
                 "choisissez une compétence",

@@ -1,6 +1,10 @@
 import polars as pl
-import connectorx as cx
 from datetime import datetime
+
+"""
+TODO
+- Bouger res_partner et res_users vers shared : pas spécifique à sale_data
+"""
 
 # CX Params
 connection = "postgresql://odoo:odoodb@127.0.0.1:5432/test"
@@ -15,6 +19,9 @@ class sales_data_model:
         self.res_users: pl.DataFrame = pl.DataFrame() 
         self.res_partner: pl.DataFrame = pl.DataFrame()
         self.res_company: pl.DataFrame = pl.DataFrame()
+
+
+        # joins
         self.sales_persons: pl.DataFrame = pl.DataFrame()
         self.salesperson_amount_no_tax: pl.DataFrame = pl.DataFrame()
 

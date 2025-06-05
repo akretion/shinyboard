@@ -2,26 +2,26 @@ import polars as pl
 
 from shiny import App, ui, render, module, reactive
 
+
+## TODO
+# - Affichage conditionnel pour les tables
+# - Meilleur affichage conditionnel pour les autres champs
+
 # Primary tables
 from sales.sale_data import getSalesData
-from shared import datetime
+from shared import getSharedData
+import datetime
 
 sales_data = getSalesData()
-company_names: list = []
-company_dict: dict = {}
+shared_data = getSharedData()
 
-for i in range(len(sales_data.company_id_dict)+1):
-    company_names.append(sales_data.company_id_dict['name'][i])
-    company_dict[f"{sales_data.company_id_dict['name'][i]}".replace(" ", "").strip()] = sales_data.company_id_dict['id'][i]
-
-print(list(company_dict))
 
 @module.ui
 def sales_persons_page():
 
     return ui.page_sidebar(
         ui.sidebar(
-            ui.h2("Indicateurs"),
+            ui.h2("Critères de tri"),
             ui.input_slider(
                 "dateslider",
                 ui.div(
@@ -41,7 +41,7 @@ def sales_persons_page():
             ui.input_select(
                 'company_name',
                 ui.h3("sélectionnez une entreprise"),
-                company_names
+                shared_data.company_names
             )
         ),
         ui.row(
@@ -59,24 +59,47 @@ def sales_persons_page():
                     ui.card_body(ui.output_data_frame("displaySalesPersons")),
                 ),
             ),
-        ),
+        )
     )
 
 
 @module.server
 def sales_persons_server(input, output, session):
 
+    @reactive.calc
+    def getCompanyDict():
+        return shared_data.company_dict
+
     # SALESPERSONS RANKED
     @reactive.calc  # works without, but crucial for optimization
     def getSalesPersons():
-        print(
-            f"(sales_persons.py l62): INPUT SLIDER : {input.dateslider()}\n TYPE : {type(input.dateslider())}"
-        )
+        if(shared_data.getSelectedCompany()[0] == ''):
+            return (
+                sales_data.sale_order.filter(
+                input.dateslider()[0] <= pl.col("date_order"),
+                input.dateslider()[1] >= pl.col("date_order"),
+                # shared_data.company_dict[f"{input.company_name()}".replace(" ", "").strip()] == pl.col("company_id"),
+                )
+                .join_where(
+                    sales_data.res_partner,
+                    pl.col("sale_order_uid").eq(pl.col("res_partner_uid")),
+                    suffix="_res_partner",
+                )
+                .select("res_partner_name", "amount_untaxed")
+                .group_by(pl.col("res_partner_name"))
+                .sum()
+                .sort(descending=True, by="amount_untaxed")
+            )
+
+        print([getCompanyDict()[company_name.replace(" ", "").strip()] for company_name in shared_data.getSelectedCompany()])
         return (
             sales_data.sale_order.filter(
                 input.dateslider()[0] <= pl.col("date_order"),
                 input.dateslider()[1] >= pl.col("date_order"),
-                company_dict[f"{input.company_name()}".replace(" ", "").strip()] == pl.col("company_id")
+                # shared_data.company_dict[f"{input.company_name()}".replace(" ", "").strip()] == pl.col("company_id"),
+                pl.col('company_id').is_in(
+                    [getCompanyDict()[company_name.replace(" ", "").strip()] for company_name in shared_data.getSelectedCompany()]
+                )
             )
             .join_where(
                 sales_data.res_partner,
@@ -109,13 +132,9 @@ def sales_persons_server(input, output, session):
             if not bsp_dict["amount_untaxed"].is_empty()
             else "Aucun montant à afficher dans la période sélectionnée"
         )
-        print(f"BSP DICT (sales_persons.py l87): \n{bsp_dict}")
         return f"{expr_name} avec {expr_amount}$ de ventes hors taxes au total"
-
-    # ORDERS
-    @reactive.calc
-    def getOrders():
-        pass
-
-    def displayOrders():
+    
+    
+    @render.data_frame
+    def displaySaleOrderWithInfo():
         pass

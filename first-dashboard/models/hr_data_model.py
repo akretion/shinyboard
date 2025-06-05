@@ -1,6 +1,6 @@
 import polars as pl
 
-class hr_data_model:
+class Hr_data_model:
     def __init__(self) -> None:
         self.hr_employee_skill: pl.DataFrame = pl.DataFrame()
         self.hr_skill: pl.DataFrame = pl.DataFrame()

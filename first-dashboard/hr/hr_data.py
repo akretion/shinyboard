@@ -1,14 +1,14 @@
 import polars as pl
 import connectorx as cx
 
-from models.hr_data_model import hr_data_model
+from models.hr_data_model import Hr_data_model
 
 connection = "postgresql://odoo:odoodb@127.0.0.1:5432/test"
 
 
 def getHRData():
     
-    hr_model = hr_data_model()
+    hr_model = Hr_data_model()
 
     # employee_id, skill_id, ...
     hr_model.hr_employee_skill = cx.read_sql(

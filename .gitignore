@@ -200,5 +200,6 @@ bin/
 etc/jupyter/nbconfig/notebook.d
 include/
 share/
+lib64/
 pyvenv.cfg
 **/__pycache__/**

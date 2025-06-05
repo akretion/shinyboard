@@ -11,11 +11,12 @@ def getSalesData():
 
     sales_model = sales_data_model()
     
-    # tables
+    # primary tables
     sales_model.sale_order = cx.read_sql(conn=connection, query="SELECT * FROM sale_order", return_type='polars').rename({"id": "sale_order_id", "user_id": "sale_order_uid"})
     sales_model.res_users = cx.read_sql(conn=connection, query="SELECT * FROM res_users", return_type='polars').rename({"id": "res_users_id", "login": "res_users_login"})
     sales_model.res_partner = cx.read_sql(conn=connection, query="SELECT * FROM res_partner", return_type='polars').rename({"id": "res_partner_id", "user_id": "res_partner_uid", "name": "res_partner_name"})
-    sales_model.res_company = cx.read_sql(conn=connection, query="SELECT * FROM res_company", return_type='polars')
+
+    # joins
     sales_model.salesperson_amount_no_tax = (
         sales_model.sale_order.join_where(
             sales_model.res_partner,
@@ -27,10 +28,6 @@ def getSalesData():
         .sum()
         .sort(descending=True, by="amount_untaxed")
     )
-
-    # ready-to-use structures (based on dataframes)
-    sales_model.company_id_dict = sales_model.res_company.select("name", "id").to_dict()
-    print(sales_model.company_id_dict)
 
     # dates and times
     sales_model.date_df = cx.read_sql(conn=connection, query="SELECT CURRENT_TIMESTAMP(0) + interval '2 hours' AS current_time, DATE_TRUNC('month', CURRENT_TIMESTAMP(0)) AS truncated ", return_type='polars')

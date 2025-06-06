@@ -4,7 +4,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-dsns = os.getenv("DSN")
+""" TODO
+- use adhoc exception class
+
+"""
+
 
 
 class Connect:
@@ -23,7 +27,10 @@ class Connect:
 
     def _get_data_sources(self):
         dsn = {}
-        for dsn_env in dsns.split("|"):
+        dsns = os.getenv("DSN")
+        if not dsns:
+            raise Exception("No DSN environment variable found.")
+        for dsn_env in os.getenv("DSN").split("|"):
             dsn_env = dsn_env.strip()
             if not dsn_env or "=" not in dsn_env:
                 continue

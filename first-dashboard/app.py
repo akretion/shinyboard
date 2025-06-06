@@ -5,15 +5,17 @@ from pathlib import Path
 
 from shiny import App, ui, reactive, render
 
-## TODO
-# - Réunir les deux pages HR dans un seul onglet, puis créer une sous page
-# de navigation dans la page aggrégat
-
 # Pages
 from hr import hr_app
 from sales import sales_app
 from purchase import purchase_app
 from shared import getSharedData
+
+from auth import auth_app
+
+# for routing between two shiny apps (or another starlette app)
+from starlette.applications import Starlette
+from starlette.routing import Mount
 
 shared_data = getSharedData()
 
@@ -65,3 +67,10 @@ def server(input, output, session):
         shared_data.setSelectedDate(*input.date_slider())
 
 app = App(app_ui, server)
+
+routes = [
+    Mount('/static', app=app),
+    Mount('/auth', app=auth_app)
+]
+
+global_app = Starlette(routes=routes)

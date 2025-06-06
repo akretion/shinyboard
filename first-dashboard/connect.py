@@ -1,6 +1,11 @@
 import os
 import connectorx as cx
+import polars as pl
+
+from dotenv import load_dotenv
 import logging
+
+print(f"ARE ENV LOADED : {load_dotenv('./.env')}")
 
 logger = logging.getLogger(__name__)
 
@@ -21,31 +26,54 @@ class Connect:
 
     def __init__(self, dsn):
         dsns = self._get_data_sources()
+        # de ce que je comprends 
+
         if dsn not in dsns:
             raise Exception("DSN not found in available data sources.")
         self._get_conn(dsns[dsn])
 
     def _get_data_sources(self):
         dsn = {}
-        dsns = os.getenv("DSN")
+        dsns = os.getenv("SHINYDSN")
         if not dsns:
             raise Exception("No DSN environment variable found.")
-        for dsn_env in os.getenv("DSN").split("|"):
+        
+        
+        print(f"DSNS : {dsns}")
+
+        # My code : Logic for nested env var declarations
+
+        ## list in format [ [DSN, URL], [DSN, URL], ... ]
+        dsns_var_names = [var_name.split("=") for var_name in dsns.replace("SHINYDSN=", "").split("|")]
+        
+        ## will contain pairs like ["DSN"] = URL
+        dsns_var_dict = {}
+
+        ## populate dict from [ [DSN, URL], [DSN, URL], ... ]
+        for dsns_var_pair in dsns_var_names:
+            dsns_var_dict[dsns_var_pair[0].strip()] = dsns_var_pair[1]
+
+
+        # what tf am i supposed to do from there...
+
+        """ code that was given to me
+        for dsn_env in os.getenv("SHINYDSN").split("|"):
             dsn_env = dsn_env.strip()
             if not dsn_env or "=" not in dsn_env:
                 continue
             dsn_name, dsn_url = dsn.split("=", 1)
             dsn[dsn_name.strip()] = dsn_url.strip()
             logger.info(f"DSN {dsn_name} available")
-        return dsn
+        """
+        return dsns_var_dict
 
-    def _get_conn(self, dsn):
+    def _get_conn(self, dsn:str):
         try:
             connection = cx.read_sql(conn=dsn, query="SELECT 1", return_type="polars")
         except Exception as e:
             print(f"Failed to connect to {dsn}: {e}")
             raise (e)
-        self.conn = connection
+        self.conn = dsn
 
-    def read(self, query, return_type="polars"):
-        return cx.read_sql(self.conn, query, return_type=return_type)
+    def read(self, query: str, return_type='polars') -> pl.DataFrame :
+        return cx.read_sql(conn=self.conn, return_type=return_type, query=query)

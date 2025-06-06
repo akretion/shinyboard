@@ -1,7 +1,9 @@
 import polars as pl
 import matplotlib.pyplot as plt
 import connectorx as cx
+
 from models.shared_data_model import Shared_data_model
+from connect import Connect
 
 from hr.hr_data import getHRData
 
@@ -43,7 +45,7 @@ def save_parquets():
     hr_data.hr_employee_named_skill.write_parquet("./parquets/hr_employee_named_skill")
 
 
-save_parquets()
+#save_parquets()
 
 placeholder_text = "Pas encore implémenté !"
 placeholder_plot = plt.bar([2, 4, 6, 8, 10, 12, 14], [10, 11, 12, 13, 14, 16, 18])

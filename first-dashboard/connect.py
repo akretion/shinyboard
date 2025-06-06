@@ -7,11 +7,10 @@ logger = logging.getLogger(__name__)
 dsns = os.getenv("DSN")
 
 
+class Connect:
+    """my = Connect("mydsn")
+    my.read("SELECT name FROM mytable")
 
-class Connect():
-    """ my = Connect("mydsn")
-        my.read("SELECT name FROM mytable")
-        
     """
 
     conn = False
@@ -38,7 +37,7 @@ class Connect():
             connection = cx.read_sql(conn=dsn, query="SELECT 1", return_type="polars")
         except Exception as e:
             print(f"Failed to connect to {dsn}: {e}")
-            raise(e)
+            raise (e)
         self.conn = connection
 
     def read(self, query, return_type="polars"):

@@ -1,15 +1,13 @@
-import matplotlib.pyplot as plt
 import polars as pl
 
-from shiny import App, ui, reactive, render, module
+from shiny import ui, reactive, render, module
 
 from hr.hr_data import getHRData
-from models.hr_data_model import Hr_data_model
-from shared import placeholder_plot, placeholder_text
-import json
+from shared import placeholder_plot
 
 
 hr_data = getHRData()
+
 
 @module.ui
 def interactive_stats_page():

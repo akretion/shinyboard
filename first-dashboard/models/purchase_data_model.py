@@ -1,5 +1,5 @@
-
 import polars as pl
+
 
 class Purchase_data_model:
     def __init__(self):

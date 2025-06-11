@@ -32,7 +32,7 @@
     color: white !important;
 }
 
-.irs-bar, .irs-handle, .irs-to, .irs-from {
+.irs-bar, .irs-handle, .irs-to, .irs-from, .irs-single {
     background-color: var(--accent-color) !important;
     color: white !important;
 }

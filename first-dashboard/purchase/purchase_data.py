@@ -1,7 +1,3 @@
-
-import connectorx as cx
-import polars as pl
-from datetime import datetime as dt
 from models.purchase_data_model import Purchase_data_model
 from connect import Connect
 
@@ -10,13 +6,15 @@ from connect import Connect
 db = Connect("dsn")
 """
 
-def getPurchaseData():
 
+def getPurchaseData():
     db = Connect("dsn1")
 
     purchase_data = Purchase_data_model()
 
     purchase_data.purchase_order = db.read("SELECT * FROM purchase_order")
-    purchase_data.suppliers = db.read("SELECT res_partner.name, res_partner.email, res_partner.website, purchase_order.write_date, purchase_order.company_id FROM res_partner JOIN purchase_order ON purchase_order.partner_id = res_partner.id")
+    purchase_data.suppliers = db.read(
+        "SELECT res_partner.name, res_partner.email, res_partner.website, purchase_order.write_date, purchase_order.company_id FROM res_partner JOIN purchase_order ON purchase_order.partner_id = res_partner.id"
+    )
 
     return purchase_data

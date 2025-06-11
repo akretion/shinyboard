@@ -2,6 +2,9 @@
 
 # ShinyBoard
 
+## Prérequis
+> ollama 3.2(+) installé localement
+
 ## Lancer l'application (stats, sans login)
 ```bash
 # après avoir créé un venv, et avoir installé avec requirements.txt

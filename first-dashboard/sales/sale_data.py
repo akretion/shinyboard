@@ -1,5 +1,4 @@
 import polars as pl
-import connectorx as cx
 from models.sales_data_model import sales_data_model
 from connect import Connect
 
@@ -10,24 +9,24 @@ db = Connect("dsn")
 
 # CX Params
 
+
 def getSalesData():
-    #df_type = "polars"
+    # df_type = "polars"
 
     db = Connect("dsn1")
 
     sales_model = sales_data_model()
-    
+
     # primary tables
-    sales_model.sale_order = db.read("SELECT * FROM sale_order").rename({
-        "user_id": "sale_order_uid"
-    })
+    sales_model.sale_order = db.read("SELECT * FROM sale_order").rename(
+        {"user_id": "sale_order_uid"}
+    )
 
     sales_model.res_users = db.read("SELECT * FROM res_users")
 
-    sales_model.res_partner = db.read("SELECT * FROM res_partner").rename({
-        "user_id" : "res_partner_uid",
-        "name" : "res_partner_name"
-    })
+    sales_model.res_partner = db.read("SELECT * FROM res_partner").rename(
+        {"user_id": "res_partner_uid", "name": "res_partner_name"}
+    )
 
     # joins
     sales_model.salesperson_amount_no_tax = (
@@ -43,11 +42,24 @@ def getSalesData():
     )
 
     # dates and times
-    sales_model.date_df = db.read("SELECT CURRENT_TIMESTAMP(0) + interval '2 hours' AS current_time, DATE_TRUNC('month', CURRENT_TIMESTAMP(0)) AS truncated ")
-    sales_model.relative_dates_df = db.read("SELECT MAX(date_order) + interval '1 days' AS max_do, MIN(date_order) AS min_do FROM sale_order")
-    sales_model.current_date = (sales_model.date_df.select("current_time").to_series().dt.replace_time_zone(None).to_list()[0])
+    sales_model.date_df = db.read(
+        "SELECT CURRENT_TIMESTAMP(0) + interval '2 hours' AS current_time, DATE_TRUNC('month', CURRENT_TIMESTAMP(0)) AS truncated "
+    )
+    sales_model.relative_dates_df = db.read(
+        "SELECT MAX(date_order) + interval '1 days' AS max_do, MIN(date_order) AS min_do FROM sale_order"
+    )
+    sales_model.current_date = (
+        sales_model.date_df.select("current_time")
+        .to_series()
+        .dt.replace_time_zone(None)
+        .to_list()[0]
+    )
 
-    sales_model.min_date_order = sales_model.relative_dates_df.select("min_do").to_series().to_list()[0]
-    sales_model.max_date_order = sales_model.relative_dates_df.select("max_do").to_series().to_list()[0]
+    sales_model.min_date_order = (
+        sales_model.relative_dates_df.select("min_do").to_series().to_list()[0]
+    )
+    sales_model.max_date_order = (
+        sales_model.relative_dates_df.select("max_do").to_series().to_list()[0]
+    )
 
     return sales_model

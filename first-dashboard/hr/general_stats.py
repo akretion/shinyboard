@@ -1,11 +1,8 @@
-from shiny import App, ui, reactive, render, module
+from shiny import ui, render, module
 import polars as pl
-import matplotlib.pyplot as plt
-import json
 
 # Data import
-from hr.hr_data import getHRData, Hr_data_model
-from shared import placeholder_plot, placeholder_text
+from hr.hr_data import getHRData
 
 
 @module.ui
@@ -35,7 +32,6 @@ def gen_stat_page():
 
 @module.server
 def gen_stat_server(input, output, session):
-
     hr_data = getHRData()
 
     # MOST KNOWN SKILL

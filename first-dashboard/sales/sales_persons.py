@@ -1,6 +1,6 @@
 import polars as pl
 
-from shiny import App, ui, render, module, reactive
+from shiny import ui, render, module, reactive
 
 
 ## TODO
@@ -10,7 +10,6 @@ from shiny import App, ui, render, module, reactive
 # Primary tables
 from sales.sale_data import getSalesData
 from shared import getSharedData
-import datetime
 
 sales_data = getSalesData()
 shared_data = getSharedData()
@@ -18,7 +17,6 @@ shared_data = getSharedData()
 
 @module.ui
 def sales_persons_page():
-
     return ui.page_sidebar(
         ui.sidebar(
             ui.h2("Critères de tri"),
@@ -37,12 +35,11 @@ def sales_persons_page():
                 timezone="UTC",
                 drag_range=True,
             ),
-
             ui.input_select(
-                'company_name',
+                "company_name",
                 ui.h3("sélectionnez une entreprise"),
-                shared_data.company_names
-            )
+                shared_data.company_names,
+            ),
         ),
         ui.row(
             ui.column(
@@ -59,13 +56,12 @@ def sales_persons_page():
                     ui.card_body(ui.output_data_frame("displaySalesPersons")),
                 ),
             ),
-        )
+        ),
     )
 
 
 @module.server
 def sales_persons_server(input, output, session):
-
     @reactive.calc
     def getCompanyDict():
         return shared_data.company_dict
@@ -73,12 +69,12 @@ def sales_persons_server(input, output, session):
     # SALESPERSONS RANKED
     @reactive.calc  # works without, but crucial for optimization
     def getSalesPersons():
-        if(shared_data.getSelectedCompany()[0] == ''):
+        if shared_data.getSelectedCompany()[0] == "":
             return (
                 sales_data.sale_order.filter(
-                input.dateslider()[0] <= pl.col("date_order"),
-                input.dateslider()[1] >= pl.col("date_order"),
-                # shared_data.company_dict[f"{input.company_name()}".replace(" ", "").strip()] == pl.col("company_id"),
+                    input.dateslider()[0] <= pl.col("date_order"),
+                    input.dateslider()[1] >= pl.col("date_order"),
+                    # shared_data.company_dict[f"{input.company_name()}".replace(" ", "").strip()] == pl.col("company_id"),
                 )
                 .join_where(
                     sales_data.res_partner,
@@ -91,15 +87,23 @@ def sales_persons_server(input, output, session):
                 .sort(descending=True, by="amount_untaxed")
             )
 
-        print([getCompanyDict()[company_name.replace(" ", "").strip()] for company_name in shared_data.getSelectedCompany()])
+        print(
+            [
+                getCompanyDict()[company_name.replace(" ", "").strip()]
+                for company_name in shared_data.getSelectedCompany()
+            ]
+        )
         return (
             sales_data.sale_order.filter(
                 input.dateslider()[0] <= pl.col("date_order"),
                 input.dateslider()[1] >= pl.col("date_order"),
                 # shared_data.company_dict[f"{input.company_name()}".replace(" ", "").strip()] == pl.col("company_id"),
-                pl.col('company_id').is_in(
-                    [getCompanyDict()[company_name.replace(" ", "").strip()] for company_name in shared_data.getSelectedCompany()]
-                )
+                pl.col("company_id").is_in(
+                    [
+                        getCompanyDict()[company_name.replace(" ", "").strip()]
+                        for company_name in shared_data.getSelectedCompany()
+                    ]
+                ),
             )
             .join_where(
                 sales_data.res_partner,
@@ -133,8 +137,7 @@ def sales_persons_server(input, output, session):
             else "Aucun montant à afficher dans la période sélectionnée"
         )
         return f"{expr_name} avec {expr_amount}$ de ventes hors taxes au total"
-    
-    
+
     @render.data_frame
     def displaySaleOrderWithInfo():
         pass

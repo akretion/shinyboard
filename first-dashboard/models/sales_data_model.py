@@ -11,15 +11,14 @@ connection = "postgresql://odoo:odoodb@127.0.0.1:5432/test"
 
 epoch = datetime(1970, 1, 1, 0, 0, 0, 0)
 
+
 class sales_data_model:
     def __init__(self) -> None:
-
         # primary tables
         self.sale_order: pl.DataFrame = pl.DataFrame()
-        self.res_users: pl.DataFrame = pl.DataFrame() 
+        self.res_users: pl.DataFrame = pl.DataFrame()
         self.res_partner: pl.DataFrame = pl.DataFrame()
         self.res_company: pl.DataFrame = pl.DataFrame()
-
 
         # joins
         self.sales_persons: pl.DataFrame = pl.DataFrame()
@@ -31,7 +30,6 @@ class sales_data_model:
         # dates
         self.date_df: pl.DataFrame = pl.DataFrame()
         self.relative_dates_df: pl.DataFrame = pl.DataFrame()
-
 
         # dates and times
         self.current_date: datetime = epoch

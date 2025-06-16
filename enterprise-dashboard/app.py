@@ -11,6 +11,7 @@ import chat
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.output_ui("credentials_input"),
+        ui.output_ui("invalid_input_text"),
         ui.hr(),
         ui.output_ui("available_tables"),
     ),
@@ -91,22 +92,23 @@ AND ir_model.model !~ '.show$'
     @reactive.effect
     @reactive.event(input.login_button)
     def login():
-        uid = (
-            LOGINS.filter(pl.col("login") == input.login())
-            .select("id")
-            .to_series()
-            .to_list()[0]
-        )
-        newValue = {
-            "valid": (
-                not LOGINS.select("login")
-                .filter(pl.col("login") == str(input.login()).strip())
-                .is_empty()
-            ),
-            "user": input.login(),
-            "user_id": uid,
-        }
-        in_logins.set(newValue)
+        if input.login() != "":
+            uid = (
+                LOGINS.filter(pl.col("login") == input.login())
+                .select("id")
+                .to_series()
+                .to_list()[0]
+            )
+            newValue = {
+                "valid": (
+                    not LOGINS.select("login")
+                    .filter(pl.col("login") == str(input.login()).strip())
+                    .is_empty()
+                ),
+                "user": input.login(),
+                "user_id": uid,
+            }
+            in_logins.set(newValue)
 
     @render.ui
     def login_handler():

@@ -5,7 +5,7 @@ from connect import Connect
 
 import polars as pl
 
-import chat
+import sql_query_input
 
 
 app_ui = ui.page_sidebar(
@@ -19,7 +19,7 @@ app_ui = ui.page_sidebar(
 
 
 def app_server(input: Inputs, output: Outputs, session: Session):
-    chat.chat_module_server("chat_module")
+    sql_query_input.sql_query_server("sql")
 
     # CONSTANTS
     DB = Connect("dsn1")
@@ -117,11 +117,9 @@ AND ir_model.model !~ '.show$'
             is_logged_in.set(True)
             return ui.page_fluid(
                 ui.h1(f"Vous êtes connecté à {in_logins.get()['user']} !"),
-                ui.span(
-                    "Posez vos questions à votre assistant pour obtenir des informations sur votre entreprise."
-                ),
+                ui.span("Entrez des requêtes SQL pour générer des indicateurs visuels"),
                 # set shared data to the currently connected user
-                chat.chat_module_ui("chat_module"),
+                sql_query_input.sql_query_input("sql"),
             )
 
         else:

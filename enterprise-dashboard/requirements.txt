@@ -4,5 +4,4 @@ seaborn
 pandas
 polars
 dotenv
-chatlas
-vanna
+sqlglot

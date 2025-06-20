@@ -7,6 +7,8 @@ import polars as pl
 
 import sql_query_input
 
+from shared import CURRENT_USER_ID, CURRENT_USER_NAME
+
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
@@ -106,6 +108,9 @@ AND ir_model.model !~ '.show$'
             "user": input.login(),
             "user_id": uid,
         }
+
+        CURRENT_USER_NAME.set(input.login())
+        CURRENT_USER_ID.set(uid)
         in_logins.set(newValue)
 
     @render.ui

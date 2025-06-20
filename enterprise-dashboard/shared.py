@@ -2,10 +2,39 @@ from pathlib import Path
 
 from shiny import reactive
 
-import polars as pl
+from connect import Connect
+
 
 app_dir = Path(__file__).parent
 
-sch_list: list[pl.Schema] = []
 
-df_schemas = reactive.value(sch_list)
+# CREDENTIALS
+CURRENT_USER_ID = reactive.value(-1)
+CURRENT_USER_NAME = reactive.value("")
+
+
+# USER UTILS
+
+
+def available_tables(uid: int, connection: Connect):
+    available_tables_df = connection.read(
+        f"""
+        SELECT ir_model.model AS table_name
+        FROM ir_model
+        JOIN ir_model_access
+        ON ir_model.id = ir_model_access.model_id
+        JOIN res_groups_users_rel
+        ON ir_model_access.group_id = res_groups_users_rel.gid
+        JOIN res_users
+        ON res_users.id = res_groups_users_rel.uid
+        WHERE ir_model.transient = FALSE 
+        AND res_users.id = {uid}
+        AND ir_model.model !~ '.show$'
+        """
+    )
+
+    # assignation des schémas dans shared
+    available_tables_df.select("table_name").to_series().to_list()
+    table_name_schema_dict = {}
+
+    print(table_name_schema_dict)

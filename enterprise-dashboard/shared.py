@@ -1,11 +1,8 @@
-from pathlib import Path
-
 from shiny import reactive
 
 from connect import Connect
 
-
-app_dir = Path(__file__).parent
+import polars as pl
 
 
 # CREDENTIALS
@@ -14,8 +11,6 @@ CURRENT_USER_NAME = reactive.value("")
 
 
 # USER UTILS
-
-
 def available_tables(uid: int, connection: Connect):
     available_tables_df = connection.read(
         f"""
@@ -38,3 +33,10 @@ def available_tables(uid: int, connection: Connect):
     table_name_schema_dict = {}
 
     print(table_name_schema_dict)
+
+
+# DATAFRAME DATA
+
+SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
+
+AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()

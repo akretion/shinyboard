@@ -5,16 +5,21 @@ from connect import Connect
 
 import polars as pl
 
-import sql_query_input
 
-from shared import CURRENT_USER_ID, CURRENT_USER_NAME
+from shared import (
+    CURRENT_USER_ID,
+    CURRENT_USER_NAME,
+    AVAILABLE_RELS,
+    SELECTED_DATAFRAME_NAME,
+)
+import sql_query_input
 
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.output_ui("credentials_input"),
         ui.hr(),
-        ui.output_ui("available_tables"),
+        ui.output_ui("get_avail_df_name_list"),
     ),
     ui.output_ui("login_handler"),
 )
@@ -30,6 +35,8 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     # REACTIVE VARS - UI depends on them
     in_logins = reactive.value({"valid": False, "user": "", "user_id": -1})
     is_logged_in = reactive.value(False)
+
+    reactive.value(pl.DataFrame())
 
     # SIDEBAR
     @render.ui
@@ -138,6 +145,65 @@ AND ir_model.model !~ '.show$'
     def log_out():
         is_logged_in.set(False)
         in_logins.set({"valid": False, "user": "", "user_id": -1})
+
+    @reactive.effect
+    def set_available_rel_df():
+        #    print(available_tables(CURRENT_USER_ID.get(), DB))
+        sale_order_joined = DB.read("""
+        SELECT
+            res_partner.name AS partner_name,
+            sale_order.name AS sale_order_name,
+            sale_order.create_date AS sale_order_create_date,
+            sale_order.company_id AS sale_order_company_id,
+            sale_order.user_id AS sale_order_user_id,
+            sale_order.write_uid AS sale_order_write_uid,
+            sale_order.write_date AS sale_order_write_date,
+            sale_order.state,
+            sale_order.amount_total,
+            sale_order.amount_tax,
+            sale_order.date_order,
+            sale_order.require_payment,
+            sale_order.require_signature
+
+        FROM sale_order
+        JOIN res_partner ON res_partner.id = sale_order.partner_id
+        """)
+
+        purchase_order_joined = DB.read(
+            """
+        SELECT
+            purchase_order.name AS purchase_order_name,
+            purchase_order.create_date AS purchase_order_create_date,
+            purchase_order.company_id AS purchase_order_company_id,
+            purchase_order.user_id AS purchase_order_user_id,
+            purchase_order.write_uid AS purchase_order_write_uid,
+            purchase_order.write_date AS purchase_order_write_date
+
+        FROM purchase_order 
+        JOIN res_partner 
+        ON purchase_order.partner_id = res_partner.id
+                                        
+        
+        """
+        )
+
+        AVAILABLE_RELS.set(
+            {"sale_order": sale_order_joined, "purchase_order": purchase_order_joined}
+        )
+
+    @render.ui
+    def get_avail_df_name_list():
+        if is_logged_in.get():
+            return ui.input_radio_buttons(
+                "df_radio_buttons",
+                ui.h3("sélectionnez une table"),
+                [name for name in AVAILABLE_RELS.get().keys()],
+            )
+
+    @reactive.effect
+    @reactive.event(input.df_radio_buttons)
+    def update_df_name_on_input():
+        SELECTED_DATAFRAME_NAME.set(input.df_radio_buttons())
 
 
 app = App(app_ui, app_server)

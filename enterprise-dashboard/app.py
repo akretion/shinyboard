@@ -2,15 +2,21 @@ from shiny import App, reactive, render, ui
 from shiny import Inputs, Outputs, Session
 
 from connect import Connect
+import sales_module.module
 
 import polars as pl
 
 
+import sales_module.sales
 from shared import (
     CURRENT_USER_ID,
     CURRENT_USER_NAME,
     AVAILABLE_RELS,
     SELECTED_DATAFRAME_NAME,
+    SELECTED_PERIOD_LOW_BOUND,
+    SELECTED_PERIOD_HIGH_BOUND,
+    MIN_DB_TIME,
+    MAX_DB_TIME,
 )
 import sql_query_input
 
@@ -20,6 +26,7 @@ app_ui = ui.page_sidebar(
         ui.output_ui("credentials_input"),
         ui.hr(),
         ui.output_ui("get_avail_df_name_list"),
+        ui.output_ui("user_filters"),
     ),
     ui.output_ui("login_handler"),
 )
@@ -130,6 +137,8 @@ AND ir_model.model !~ '.show$'
             return ui.page_navbar(
                 ui.nav_panel(
                     ui.h2("ventes"),
+                    sales_module.module.module_ui("sales_mod"),
+                    sales_module.module.module_server("sales_mod"),
                 ),
                 ui.nav_panel(
                     ui.h2("génération d'indicateurs"),
@@ -159,17 +168,19 @@ AND ir_model.model !~ '.show$'
         in_logins.set({"valid": False, "user": "", "user_id": -1})
 
     @reactive.effect
-    def set_available_rel_df():
+    def set_df_and_shared_values():
         #    print(available_tables(CURRENT_USER_ID.get(), DB))
         sale_order_joined = DB.read("""
         SELECT
             res_partner.name AS partner,
             sale_order.name AS sale_order,
+            sale_order.user_id AS uid,
             sale_order.create_date AS sale_order_create_date,
             sale_order.company_id AS sale_order_company_id,
             sale_order.user_id AS sale_order_user_id,
             sale_order.write_uid AS sale_order_write_uid,
             sale_order.write_date AS sale_order_write_date,
+            sale_order.invoice_status,
             sale_order.state,
             sale_order.amount_total,
             sale_order.amount_tax,
@@ -178,6 +189,7 @@ AND ir_model.model !~ '.show$'
             sale_order.require_signature
 
         FROM sale_order
+        JOIN res_users ON res_users.id = sale_order.user_id
         JOIN res_partner ON res_partner.id = sale_order.partner_id
         """)
 
@@ -201,13 +213,25 @@ AND ir_model.model !~ '.show$'
 
         res_company = DB.read("""SELECT * FROM res_company""")
 
-        DB.read("""SELECT * FROM res_partner""")
+        res_partner = DB.read("""SELECT * FROM res_partner""")
+
+        MIN_DB_TIME.set(
+            sale_order_joined.sql(
+                """SELECT MIN(date_order) AS min FROM self"""
+            ).to_dict()["min"][0]
+        )
+        MAX_DB_TIME.set(
+            sale_order_joined.sql(
+                """SELECT MAX(date_order) + interval '1 day' AS max FROM self"""
+            ).to_dict()["max"][0]
+        )
 
         AVAILABLE_RELS.set(
             {
                 "sale_order": sale_order_joined,
                 "purchase_order": purchase_order_joined,
                 "res_company": res_company,
+                "res_partner": res_partner,
             }
         )
 
@@ -220,10 +244,35 @@ AND ir_model.model !~ '.show$'
                 [name for name in AVAILABLE_RELS.get().keys()],
             )
 
+    @render.ui
+    def user_filters():
+        if is_logged_in.get():
+            print(f"MIN  : {MIN_DB_TIME.get()}")
+            print(f"MAX : {MAX_DB_TIME.get()}")
+            return ui.span(
+                ui.input_slider(
+                    "date_range",
+                    ui.span("sélection de date"),
+                    MIN_DB_TIME.get(),
+                    MAX_DB_TIME.get(),
+                    [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                    time_format="%Y-%m-%d",
+                    drag_range=True,
+                )
+            )
+
     @reactive.effect
     @reactive.event(input.df_radio_buttons)
     def update_df_name_on_input():
         SELECTED_DATAFRAME_NAME.set(input.df_radio_buttons())
+
+    @reactive.effect
+    @reactive.event(input.date_range)
+    def date_range_handler():
+        values = input.date_range()
+
+        SELECTED_PERIOD_LOW_BOUND.set(values[0])
+        SELECTED_PERIOD_HIGH_BOUND.set(values[1])
 
 
 app = App(app_ui, app_server)

@@ -10,7 +10,7 @@ db = Connect("dsn")
 
 
 def getHRData():
-    db = Connect("dsn2")
+    db = Connect("dsn1")
 
     print("MY.READ: \n")
     print(db.read("SELECT name FROM hr_skill"))

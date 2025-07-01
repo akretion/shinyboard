@@ -1,10 +1,14 @@
 from shiny import reactive
 
 import polars as pl
+from datetime import datetime
 
 from connect import Connect
 from peewee import PostgresqlDatabase
 
+
+# CONSTANTS
+EPOCH = datetime(1970, 1, 1, 0, 0, 0)
 
 # ORM DATABASE
 QUERY_DB = PostgresqlDatabase("query_db", user="cosmos")
@@ -45,6 +49,15 @@ SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
 
 AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
 
-# DATAFRAME BASED DATA
+MIN_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
+MAX_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
+
+# DATAFRAME RELATED DATA
 
 COMPANY_TO_ID_DICT: reactive.value[dict]
+
+
+# GLOBAL USER FILTERS
+
+SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
+SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)

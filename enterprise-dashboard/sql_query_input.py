@@ -6,11 +6,18 @@ import polars as pl
 import sqlglot
 import sqlglot.expressions
 import inspect  # to get sqlglot's class hierarchy
+from typing import Union
+
 from shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME
-
 from connect import Connect
+from repositories.stored_query_repository import StoredQueryRepository
 
-DB = Connect("dsn1")
+# TODO
+## A repository Resolver : no need to import individual repositories, just feed an instance to the resolver and it makes
+## the operation for you
+
+DB = Connect("dsn2")
+STORED_QUERY_REPO = StoredQueryRepository()
 
 
 @module.ui
@@ -39,8 +46,15 @@ def sql_query_input():
 def sql_query_server(input: Inputs, output: Outputs, session: Session):
     # in deprecation...
     differentiator: reactive.value[int] = reactive.value(0)
+    title_diff = "title_"
+    state_diff = "state_"
+    input_diff = "input_"
+    button_diff = "button_"
+
+    input_states: Union[
+        reactive.value[dict[str, reactive.value[bool]]], reactive.value[dict]
+    ] = reactive.value({})  # True: closed, False: in edition
     ui_res_list: reactive.value[list[ui.Tag]] = reactive.value([])
-    output_functions: reactive.value[list] = reactive.value([])
 
     @render.data_frame
     def selected_df():
@@ -54,147 +68,207 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
 
         return peek
 
-    @reactive.calc
-    def dynamical_server_function():
-        for func in output_functions.get():
-            func()
-
     @render.ui
     def query_res_display():
         return ui_res_list.get()
 
-    def handle_plot_query():
-        if parse_postgres(input.query()):
-            if valid_postgres(input.query()):
-                CURRENT_DATAFRAME = AVAILABLE_RELS.get()[
-                    f"{SELECTED_DATAFRAME_NAME.get()}"
-                ]
-
-                if (
-                    input.query().replace("my_table", "test") == input.query()
-                    and input.query().replace("self", "test") == input.query()
-                ):
-                    # my_table or self wasn't typed by user, aborting function
-                    print("Invalid table name, use 'my_table' (or 'self') instead")
-                    return
-
-                else:
-                    query_with_self = input.query().replace("my_table", "self")
-                    query_with_df_name = input.query().replace(
-                        "my_table", f"{SELECTED_DATAFRAME_NAME.get()}"
-                    )
-
-                    expr = sqlglot.parse_one(query_with_self)
-                    x_data = []
-                    y_data = []
-
-                    for col in expr.args["expressions"]:
-                        if type(col) is sqlglot.expressions.Column:
-                            print(f"is column : {col}")
-                            # if it's a regular column
-                            print(
-                                CURRENT_DATAFRAME.select(f"{col}").to_series().to_list()
-                            )
-                            x_data = (
-                                CURRENT_DATAFRAME.select(f"{col}").to_series().to_list()
-                            )
-
-                        elif (
-                            isinstance(col, sqlglot.expressions.Alias)
-                            and len(y_data) == 0
-                            or isinstance(col, sqlglot.expressions.AggFunc)
-                        ):
-                            agg_col_name = col.args["this"].this
-
-                            y_data = (
-                                CURRENT_DATAFRAME.select(f"{agg_col_name}")
-                                .to_series()
-                                .to_list()
-                            )
-
-                        # testing for something wrong
-                        else:
-                            print(inspect.getmro(type(col)))
-
-                    print(f"X_DATA : {x_data}")
-                    print(f"Y_DATA : {y_data}")
-
-                    @output(id=f"{differentiator.get()}")
-                    @render.plot
-                    def plot_output():
-                        plt.bar(x_data, y_data)
-
-                    output_functions.set([*output_functions.get(), plot_output])
-
-                    ui_res_list.set(
-                        [
-                            *ui_res_list.get(),
-                            ui.span(
-                                ui.h3(query_with_df_name),
-                                ui.output_plot(f"{differentiator.get()}"),
-                            ),
-                        ]
-                    )
-
-                    differentiator.set(differentiator.get() + 1)
-
-    def handle_dataframe_query():
-        if input.query().strip() != "":
-            if parse_postgres(input.query()):
-                if valid_postgres(input.query()):
-                    if (
-                        input.query().replace("my_table", "test") == input.query()
-                        and input.query().replace("self", "test") == input.query()
-                    ):
-                        # my_table or self wasn't typed by user, aborting function
-                        print("Invalid table name, use 'my_table' (or 'self') instead")
-                        return
-
-                    query_with_self = f"{input.query().replace('my_table', 'self')}"
-                    f"{input.query().replace('my_table', f'{SELECTED_DATAFRAME_NAME.get()}')}"
-
-                    CURRENT_DATAFRAME = AVAILABLE_RELS.get()[
-                        f"{SELECTED_DATAFRAME_NAME.get()}"
-                    ]
-
-                    @output(id=f"{differentiator.get()}")
-                    @render.data_frame
-                    def df_func():
-                        df = CURRENT_DATAFRAME.sql(query_with_self)
-                        return df
-
-                    output_functions.set([*output_functions.get(), df_func])
-
-                    ui_res_list.set(
-                        [
-                            *ui_res_list.get(),
-                            ui.div(
-                                ui.h3(query_with_self),
-                                ui.output_data_frame(f"{differentiator.get()}"),
-                            ),
-                        ]
-                    )
-
-                    differentiator.set(differentiator.get() + 1)
-
-                else:
-                    print(
-                        "Your statement contains illegal operations (you can't Update, Delete or Create)"
-                    )
-            else:
-                print("Your SQL statement is Invalid")
-
-        else:
-            print("Please input a query before executing the query")
-
     @reactive.effect
     @reactive.event(input.exec)
     def query_handler():
-        if input.query().upper().find("GROUP BY") > 0:
-            # on considère que ça peut-être affiché en tant que graphe
-            handle_plot_query()
+        if parse_postgres(input.query()) and valid_postgres(input.query()):
+            CURRENT_DATAFRAME = AVAILABLE_RELS.get()[f"{SELECTED_DATAFRAME_NAME.get()}"]
+
+        if (
+            input.query().replace("my_table", "test") == input.query()
+            and input.query().replace("self", "test") == input.query()
+        ):
+            # my_table or self wasn't typed by user, aborting function
+            ui.notification_show(
+                ui.h3(
+                    "table non reconnue, utilisez 'my_table' ou 'self'.", type="warning"
+                )
+            )
+            return
+
         else:
-            handle_dataframe_query()
+            query_with_self: str = input.query().replace("my_table", "self")
+
+            query_with_df_name: str = (
+                input.query().replace("my_table", f"{SELECTED_DATAFRAME_NAME.get()}")
+                if input.query().replace("my_table", f"{SELECTED_DATAFRAME_NAME.get()}")
+                is not input.query().replace(
+                    "my_table", f"{SELECTED_DATAFRAME_NAME.get()}"
+                )
+                else input.query().replace("self", f"{SELECTED_DATAFRAME_NAME.get()}")
+            )
+
+            title_to_store: reactive.value[str] = reactive.value(query_with_df_name)
+
+            current_diff = differentiator.get()
+
+            # Graph case
+            if input.query().upper().find("GROUP BY") > 0:
+                expr = sqlglot.parse_one(query_with_self)
+                x_data = []
+                y_data = []
+
+                for col in expr.args["expressions"]:
+                    if type(col) is sqlglot.expressions.Column:
+                        x_data = (
+                            CURRENT_DATAFRAME.select(f"{col}").to_series().to_list()
+                        )
+
+                    elif (
+                        isinstance(col, sqlglot.expressions.Alias)
+                        and len(y_data) == 0
+                        or isinstance(col, sqlglot.expressions.AggFunc)
+                    ):
+                        agg_col_name = col.args["this"].this
+
+                        y_data = (
+                            CURRENT_DATAFRAME.select(f"{agg_col_name}")
+                            .to_series()
+                            .to_list()
+                        )
+
+                    # should never happen
+                    else:
+                        print(inspect.getmro(type(col)))
+                        raise Exception(
+                            "Oops, that's not supposed to happen ! The type of column you queried isn't recognized"
+                        )
+
+                print("PASSED IN PLOT")
+
+                @output(id=f"{differentiator.get()}")
+                @render.plot
+                def plot_output():
+                    plt.bar(x_data, y_data)
+
+                ui_res_list.set(
+                    [
+                        *ui_res_list.get(),
+                        ui.span(
+                            ui.card(
+                                ui.output_ui(f"{title_diff}{current_diff}"),
+                                ui.card_body(ui.output_plot(f"{current_diff}")),
+                                ui.row(ui.output_ui(f"{button_diff}{current_diff}")),
+                            )
+                        ),
+                    ]
+                )
+
+            # Dataframe case
+            else:
+
+                @output(id=f"{current_diff}")
+                @render.data_frame
+                def df_func():
+                    df = CURRENT_DATAFRAME.sql(query_with_self)
+                    return df
+
+                ui_res_list.set(
+                    [
+                        *ui_res_list.get(),
+                        ui.card(
+                            ui.output_ui(f"{title_diff}{current_diff}"),
+                            ui.card_body(ui.output_data_frame(f"{current_diff}")),
+                            ui.card_footer(
+                                ui.row(ui.output_ui(f"{button_diff}{current_diff}"))
+                            ),
+                        ),
+                    ]
+                )
+            # IN ANY CASE
+            input_states.get().update(
+                {f"{state_diff}{current_diff}": reactive.value(True)}
+            )
+
+            @output(id=f"{title_diff}{current_diff}")
+            @render.ui
+            def titlefunc():
+                # print(f'differentiator in titlefunc: {differentiator.get()}')
+                try:
+                    if input_states.get()[f"{state_diff}{current_diff}"].get():
+                        return ui.h3(title_to_store.get())
+                    else:
+                        return ui.row(
+                            ui.column(
+                                8,
+                                ui.input_text(
+                                    f"{input_diff}{current_diff}",
+                                    "entrez le nouveau titre",
+                                ),
+                            ),
+                            ui.column(
+                                4,
+                                ui.input_action_button(
+                                    f"confirm_{current_diff}", "confirmer"
+                                ),
+                            ),
+                        )
+                except KeyError:
+                    # print(f"key {state_diff}{current_diff} doesn't exist in input_states")
+                    # print(f"input_states' keys : {input_states.get().keys()}")
+                    return ui.notification_show("**sonic 2 game overr**")
+
+            @reactive.effect
+            @reactive.event(input[f"edit_{current_diff}"])
+            def editing_switch():
+                print(f"editing switch of {state_diff}{current_diff} activated")
+                input_states.get()[f"{state_diff}{current_diff}"].set(False)
+                input_states.set(input_states.get())  # forces invalidation
+
+            @reactive.effect
+            @reactive.event(input[f"confirm_{current_diff}"])
+            def confirm_new_title():
+                nonlocal title_to_store
+                title_to_store.set(input[f"{input_diff}{current_diff}"]())
+                input_states.get()[f"{state_diff}{current_diff}"].set(True)
+
+                ui.notification_show(ui.h3("Titre modifié."), type="message")
+
+            ## SAVING TO DB - data independant ##
+            @reactive.effect
+            @reactive.event(input[f"save_{current_diff}"])
+            def save_query_to_db():
+                STORED_QUERY_REPO.create(
+                    display_title=title_to_store.get(),
+                    query=query_with_df_name,
+                    df_key_name=SELECTED_DATAFRAME_NAME.get(),
+                )
+
+                ui.notification_show(ui.h3("Requête sauvegardée."), type="message")
+
+            ###
+
+            @output(id=f"{button_diff}{current_diff}")
+            @render.ui
+            def buttonfunc():
+                # print(f'differentiator in button func: {differentiator.get()}')
+                return ui.card_footer(
+                    ui.row(
+                        ui.column(
+                            6,
+                            ui.input_action_button(
+                                f"edit_{current_diff}", "modifier le titre"
+                            ),
+                        ),
+                        ui.column(
+                            6,
+                            ui.input_action_button(
+                                f"save_{current_diff}", "sauvegarder la requête"
+                            ),
+                        ),
+                    )
+                )
+
+                # CALLED FIRST
+                # adds a new state set to 'closed' (True)
+
+                # print("ui res list updated")
+
+            differentiator.set(differentiator.get() + 1)
 
     def return_placeholders(pl_title: str, pl_text: str):
         @output(id=f"{differentiator.get()}")

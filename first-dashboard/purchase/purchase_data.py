@@ -8,7 +8,7 @@ db = Connect("dsn")
 
 
 def getPurchaseData():
-    db = Connect("dsn1")
+    db = Connect("dsn2")
 
     purchase_data = Purchase_data_model()
 

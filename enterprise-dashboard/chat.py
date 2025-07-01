@@ -12,7 +12,7 @@ model = "cosmos-model1"
 
 vn = VannaDefault(model=model, api_key=api_key)
 
-DB = Connect("dsn1")
+DB = Connect("dsn2")
 
 dataframes: dict[str, pl.DataFrame] = {
     "sale_order": DB.read("SELECT * FROM sale_order"),

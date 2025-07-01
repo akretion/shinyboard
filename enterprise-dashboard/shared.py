@@ -1,9 +1,13 @@
 from shiny import reactive
 
-from connect import Connect
-
 import polars as pl
 
+from connect import Connect
+from peewee import PostgresqlDatabase
+
+
+# ORM DATABASE
+QUERY_DB = PostgresqlDatabase("query_db", user="cosmos")
 
 # CREDENTIALS
 CURRENT_USER_ID = reactive.value(-1)
@@ -40,3 +44,7 @@ def available_tables(uid: int, connection: Connect):
 SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
 
 AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+
+# DATAFRAME BASED DATA
+
+COMPANY_TO_ID_DICT: reactive.value[dict]

@@ -5,3 +5,5 @@ pandas
 polars
 dotenv
 sqlglot
+peewee
+psycopg2

@@ -29,7 +29,7 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     sql_query_input.sql_query_server("sql")
 
     # CONSTANTS
-    DB = Connect("dsn1")
+    DB = Connect("dsn2")
     LOGINS = DB.read("SELECT id, login FROM res_users")
 
     # REACTIVE VARS - UI depends on them
@@ -127,11 +127,23 @@ AND ir_model.model !~ '.show$'
 
         elif in_logins.get()["valid"]:
             is_logged_in.set(True)
-            return ui.page_fluid(
-                ui.h1(f"Vous êtes connecté à {in_logins.get()['user']} !"),
-                ui.span("Entrez des requêtes SQL pour générer des indicateurs visuels"),
+            return ui.page_navbar(
+                ui.nav_panel(
+                    ui.h2("ventes"),
+                ),
+                ui.nav_panel(
+                    ui.h2("génération d'indicateurs"),
+                    ui.h1(f"Vous êtes connecté à {in_logins.get()['user']} !"),
+                    ui.span(
+                        "Entrez des requêtes SQL pour générer des indicateurs visuels"
+                    ),
+                    sql_query_input.sql_query_input("sql"),
+                ),
+                ui.nav_panel(
+                    ui.h2("requêtes stockées"),
+                    # page that displays database stored queries
+                ),
                 # set shared data to the currently connected user
-                sql_query_input.sql_query_input("sql"),
             )
 
         else:
@@ -151,8 +163,8 @@ AND ir_model.model !~ '.show$'
         #    print(available_tables(CURRENT_USER_ID.get(), DB))
         sale_order_joined = DB.read("""
         SELECT
-            res_partner.name AS partner_name,
-            sale_order.name AS sale_order_name,
+            res_partner.name AS partner,
+            sale_order.name AS sale_order,
             sale_order.create_date AS sale_order_create_date,
             sale_order.company_id AS sale_order_company_id,
             sale_order.user_id AS sale_order_user_id,
@@ -187,8 +199,16 @@ AND ir_model.model !~ '.show$'
         """
         )
 
+        res_company = DB.read("""SELECT * FROM res_company""")
+
+        DB.read("""SELECT * FROM res_partner""")
+
         AVAILABLE_RELS.set(
-            {"sale_order": sale_order_joined, "purchase_order": purchase_order_joined}
+            {
+                "sale_order": sale_order_joined,
+                "purchase_order": purchase_order_joined,
+                "res_company": res_company,
+            }
         )
 
     @render.ui

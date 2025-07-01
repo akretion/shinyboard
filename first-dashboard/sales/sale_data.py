@@ -13,7 +13,7 @@ db = Connect("dsn")
 def getSalesData():
     # df_type = "polars"
 
-    db = Connect("dsn1")
+    db = Connect("dsn2")
 
     sales_model = sales_data_model()
 

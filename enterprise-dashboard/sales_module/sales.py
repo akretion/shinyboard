@@ -1,5 +1,7 @@
 from shiny import module, Inputs, Outputs, Session, ui, render, reactive
 
+from great_tables import GT, md
+
 import polars as pl
 
 from shared import (
@@ -12,7 +14,7 @@ from shared import (
 
 @module.ui
 def sales_ui():
-    return ui.page_fluid(ui.output_data_frame("display_sale_order"))
+    return ui.page_fluid(ui.output_ui("display_sale_order"))
 
 
 @module.server
@@ -23,25 +25,34 @@ def sales_server(inputs: Inputs, outputs: Outputs, session: Session):
             sale_order_df = AVAILABLE_RELS.get()["sale_order"]
 
             if SELECTED_PERIOD_HIGH_BOUND.get() != EPOCH:  # to avoid errors
-                return sale_order_df.filter(
-                    pl.col("sale_order_create_date") >= SELECTED_PERIOD_LOW_BOUND.get(),
-                    pl.col("sale_order_create_date")
-                    <= SELECTED_PERIOD_HIGH_BOUND.get(),
-                )
+                return GT(
+                    sale_order_df.filter(
+                        pl.col("date_order").is_between(
+                            SELECTED_PERIOD_LOW_BOUND.get(),
+                            SELECTED_PERIOD_HIGH_BOUND.get(),
+                        )
+                    )
+                ).tab_header(title=md("# Les ventes"), subtitle=md("toutes confondues"))
             else:
-                return sale_order_df
+                return GT(sale_order_df).tab_header(
+                    title=md("# Les ventes"), subtitle=md("toutes confondues")
+                )
 
         except KeyError as KE:
             ui.notification_show(
                 ui.h3("vous n'avez apparemment pas accès à la table des ventes.")
             )
             print(KE)
-            return pl.DataFrame()
+            return GT(pl.DataFrame()).tab_header(
+                title=md("# Les ventes"), subtitle=md("toutes confondues")
+            )
 
         except Exception:
             ui.notification_show(ui.h3("une erreur est survenue ':) ..."))
-            return pl.DataFrame()
+            return GT(pl.DataFrame()).tab_header(
+                title=md("# Les ventes"), subtitle=md("toutes confondues")
+            )
 
-    @render.data_frame
+    @render.ui
     def display_sale_order():
         return get_sale_order()

@@ -7,3 +7,4 @@ dotenv
 sqlglot
 peewee
 psycopg2
+great_tables

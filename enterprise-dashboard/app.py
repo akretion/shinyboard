@@ -181,13 +181,13 @@ AND ir_model.model !~ '.show$'
             sale_order.create_date::date AS sale_order_create_date,
             sale_order.company_id AS sale_order_company_id,
             sale_order.user_id AS sale_order_user_id,
-            sale_order.write_uid AS sale_order_write_uid,
-            sale_order.write_date AS sale_order_write_date,
+            sale_order.write_uid AS write_uid,
+            sale_order.write_date::date AS write_date,
             sale_order.invoice_status,
             sale_order.state,
             sale_order.amount_total,
             sale_order.amount_tax,
-            sale_order.date_order,
+            sale_order.date_order::date,
             sale_order.require_payment,
             sale_order.require_signature
 
@@ -233,7 +233,16 @@ AND ir_model.model !~ '.show$'
             ).to_dict()["max"][0]
         )
 
-        sale_order_line = DB.read("SELECT * FROM sale_order_line")
+        sale_order_line = DB.read(
+            """
+            SELECT
+                id,
+                name,
+                product_uom_qty,
+                price_unit,
+                create_date::date
+            FROM sale_order_line"""
+        )
 
         OTHER_RELS.set({"sale_order_line": sale_order_line})
 

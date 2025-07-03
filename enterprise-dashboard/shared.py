@@ -1,6 +1,7 @@
 from shiny import reactive
 
 import polars as pl
+import sqlglot.expressions
 from datetime import datetime
 
 from connect import Connect
@@ -45,12 +46,16 @@ def available_tables(uid: int, connection: Connect):
 
 # DATAFRAME DATA
 
-SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
-
 AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+"""Available to the user"""
+
+SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
 
 MIN_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
 MAX_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
+
+OTHER_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+"""Available for internal use"""
 
 # DATAFRAME RELATED DATA
 
@@ -61,3 +66,37 @@ COMPANY_TO_ID_DICT: reactive.value[dict]
 
 SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
 SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
+
+
+# UTILS
+def parse_postgres(q: str):
+    """checks if the query is valid postgres"""
+    try:
+        expr = sqlglot.parse_one(q, read="postgres")
+
+        # cases not detected by sqlglot
+        if isinstance(expr, sqlglot.expressions.Select) and not expr.expressions:
+            raise sqlglot.ParseError("Incomplete SELECT statement, no column specified")
+
+        return True
+
+    except sqlglot.ParseError as parse_error:
+        print(parse_error)
+        return False
+
+    except Exception as error:
+        print(error)
+        return False
+
+
+def valid_postgres(q: str):
+    """checks if the query only contains projections (no Create, Update or Delete allowed)"""
+    if (
+        q.upper().find("UPDATE") < 0
+        or q.upper().find("DELETE") < 0
+        or q.upper().find("CREATE") < 0
+        or q.upper().find("DROP") < 0
+    ):
+        return True
+    else:
+        return False

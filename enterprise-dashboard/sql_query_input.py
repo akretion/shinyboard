@@ -3,7 +3,6 @@ from shiny import module, Inputs, Outputs, Session
 
 import matplotlib.pyplot as plt
 import polars as pl
-import sqlglot
 import sqlglot.expressions
 import inspect  # to get sqlglot's class hierarchy
 from typing import Union
@@ -137,8 +136,6 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                         raise Exception(
                             "Oops, that's not supposed to happen ! The type of column you queried isn't recognized"
                         )
-
-                print("PASSED IN PLOT")
 
                 @output(id=f"{differentiator.get()}")
                 @render.plot

@@ -10,6 +10,9 @@ class StoredQueryRepository(SimpleRepository):
     def get_prog_instance(self):
         return StoredQuery()
 
+    def get_all(self):
+        return super().get_all(StoredQuery)
+
     def create(self, display_title: str, query: str, df_key_name: str):
         return super().create(
             StoredQuery,

@@ -17,8 +17,10 @@ from shared import (
     SELECTED_PERIOD_HIGH_BOUND,
     MIN_DB_TIME,
     MAX_DB_TIME,
+    OTHER_RELS,
 )
 import sql_query_input
+import stored_queries_page
 
 
 app_ui = ui.page_sidebar(
@@ -150,7 +152,8 @@ AND ir_model.model !~ '.show$'
                 ),
                 ui.nav_panel(
                     ui.h2("requêtes stockées"),
-                    # page that displays database stored queries
+                    stored_queries_page.stored_queries_ui("stored"),
+                    stored_queries_page.stored_queries_server("stored"),
                 ),
                 # set shared data to the currently connected user
             )
@@ -172,10 +175,10 @@ AND ir_model.model !~ '.show$'
         #    print(available_tables(CURRENT_USER_ID.get(), DB))
         sale_order_joined = DB.read("""
         SELECT
-            res_partner.name AS partner,
+            order_partner.name AS customer,
+            order_user.name AS salesperson,
             sale_order.name AS sale_order,
-            sale_order.user_id AS uid,
-            sale_order.create_date AS sale_order_create_date,
+            sale_order.create_date::date AS sale_order_create_date,
             sale_order.company_id AS sale_order_company_id,
             sale_order.user_id AS sale_order_user_id,
             sale_order.write_uid AS sale_order_write_uid,
@@ -189,8 +192,12 @@ AND ir_model.model !~ '.show$'
             sale_order.require_signature
 
         FROM sale_order
-        JOIN res_users ON res_users.id = sale_order.user_id
-        JOIN res_partner ON res_partner.id = sale_order.partner_id
+                                    
+        JOIN res_partner AS order_partner 
+        ON sale_order.partner_id = order_partner.id
+                                    
+        JOIN res_partner AS order_user 
+        ON sale_order.user_id = order_user.user_id
         """)
 
         purchase_order_joined = DB.read(
@@ -204,10 +211,10 @@ AND ir_model.model !~ '.show$'
             purchase_order.write_date AS purchase_order_write_date
 
         FROM purchase_order 
+
         JOIN res_partner 
         ON purchase_order.partner_id = res_partner.id
                                         
-        
         """
         )
 
@@ -225,6 +232,10 @@ AND ir_model.model !~ '.show$'
                 """SELECT MAX(date_order) + interval '1 day' AS max FROM self"""
             ).to_dict()["max"][0]
         )
+
+        sale_order_line = DB.read("SELECT * FROM sale_order_line")
+
+        OTHER_RELS.set({"sale_order_line": sale_order_line})
 
         AVAILABLE_RELS.set(
             {

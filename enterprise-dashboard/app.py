@@ -13,6 +13,7 @@ from shared import (
     CURRENT_USER_NAME,
     AVAILABLE_RELS,
     SELECTED_DATAFRAME_NAME,
+    FRENCH_NAME,
     SELECTED_PERIOD_LOW_BOUND,
     SELECTED_PERIOD_HIGH_BOUND,
     MIN_DB_TIME,
@@ -36,6 +37,12 @@ app_ui = ui.page_sidebar(
 
 def app_server(input: Inputs, output: Outputs, session: Session):
     sql_query_input.sql_query_server("sql")
+
+    translation = {
+        "Ventes": "sale_order",
+        "Achat": "purchase_order",
+        "Partenaires": "res_partner",
+    }
 
     # CONSTANTS
     DB = Connect("dsn2")
@@ -236,21 +243,37 @@ AND ir_model.model !~ '.show$'
         sale_order_line = DB.read(
             """
             SELECT
-                id,
-                name,
+                sol.id,
+                sol.name AS name,
+                product_category.complete_name AS category,
+                res_partner.name AS customer,
                 product_uom_qty,
                 price_unit,
-                create_date::date
-            FROM sale_order_line"""
+                price_total,
+                sol.create_date::date
+
+            FROM sale_order_line sol
+
+            JOIN res_partner
+            ON res_partner.id = sol.order_partner_id
+
+            JOIN product_product
+            ON sol.product_id = product_product.id
+
+            JOIN product_template
+            ON product_product.product_tmpl_id = product_template.id
+
+            JOIN product_category
+            ON product_template.categ_id = product_category.id
+            """
         )
 
-        OTHER_RELS.set({"sale_order_line": sale_order_line})
+        OTHER_RELS.set({"sale_order_line": sale_order_line, "res_company": res_company})
 
         AVAILABLE_RELS.set(
             {
                 "sale_order": sale_order_joined,
                 "purchase_order": purchase_order_joined,
-                "res_company": res_company,
                 "res_partner": res_partner,
             }
         )
@@ -261,14 +284,12 @@ AND ir_model.model !~ '.show$'
             return ui.input_radio_buttons(
                 "df_radio_buttons",
                 ui.h3("sélectionnez une table"),
-                [name for name in AVAILABLE_RELS.get().keys()],
+                [name for name in translation.keys()],
             )
 
     @render.ui
     def user_filters():
         if is_logged_in.get():
-            print(f"MIN  : {MIN_DB_TIME.get()}")
-            print(f"MAX : {MAX_DB_TIME.get()}")
             return ui.span(
                 ui.input_slider(
                     "date_range",
@@ -284,7 +305,8 @@ AND ir_model.model !~ '.show$'
     @reactive.effect
     @reactive.event(input.df_radio_buttons)
     def update_df_name_on_input():
-        SELECTED_DATAFRAME_NAME.set(input.df_radio_buttons())
+        SELECTED_DATAFRAME_NAME.set(translation[input.df_radio_buttons()])
+        FRENCH_NAME.set(input.df_radio_buttons())
 
     @reactive.effect
     @reactive.event(input.date_range)

@@ -50,6 +50,7 @@ AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
 """Available to the user"""
 
 SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
+FRENCH_NAME: reactive.value[str] = reactive.value("")
 
 MIN_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
 MAX_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)

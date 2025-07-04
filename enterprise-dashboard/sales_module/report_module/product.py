@@ -17,6 +17,24 @@ from shared import (
 @module.ui
 def product_ui():
     return ui.page_fluid(
+        ui.h2("Catégorie la plus populaire"),
+        ui.hr(),
+        ui.row(
+            ui.column(
+                7,
+                ui.card(
+                    ui.card_header(ui.h3("par revenu")),
+                    ui.card_body(ui.output_ui("display_trending_category_revenue")),
+                ),
+            ),
+            ui.column(
+                5,
+                ui.card(
+                    ui.card_header(ui.h3("par unités vendues")),
+                    ui.card_body(ui.output_ui("display_trending_category_units_sold")),
+                ),
+            ),
+        ),
         ui.h2("Ventes de produits"),
         ui.hr(),
         ui.row(
@@ -105,3 +123,63 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     @render.plot
     def display_product_plot():
         return get_product_plot()
+
+    @reactive.calc
+    def get_trending_category_units_sold():
+        sale_order_line = get_sale_order_line_filtered()
+
+        info = (
+            sale_order_line.select("category", "id")
+            .group_by("category")
+            .agg(pl.col("id").count())
+            .sort(by="id", descending=True)
+            .limit(1)
+            .to_dict()
+        )
+
+        if info["category"].is_empty() or info["id"].is_empty():
+            return {
+                "category": "aucune catégorie pour la période sélectionnée",
+                "count": "0",
+            }
+        else:
+            return {"category": info["category"][0], "count": info["id"][0]}
+
+    @render.ui
+    def display_trending_category_units_sold():
+        result = get_trending_category_units_sold()
+
+        return ui.span(
+            ui.h2(f"{result['category']}"),
+            ui.h4(f"avec {result['count']} unités vendues."),
+        )
+
+    @reactive.calc
+    def get_trending_category_revenue():
+        sale_order_line = get_sale_order_line_filtered()
+
+        info = (
+            sale_order_line.select("category", "price_total")
+            .group_by("category")
+            .agg(pl.col("price_total").sum())
+            .sort(by="price_total", descending=True)
+            .limit(1)
+            .to_dict()
+        )
+
+        if info["category"].is_empty() or info["price_total"].is_empty():
+            return {
+                "category": "pas de revenu pour la période sélectionnée",
+                "price": "0",
+            }
+        else:
+            return {"category": info["category"][0], "price": info["price_total"][0]}
+
+    @render.ui
+    def display_trending_category_revenue():
+        result = get_trending_category_revenue()
+
+        return ui.span(
+            ui.h2(f"{result['category']}"),
+            ui.h4(f"avec {result['price']}$ de revenu généré."),
+        )

@@ -7,7 +7,7 @@ import sqlglot.expressions
 import inspect  # to get sqlglot's class hierarchy
 from typing import Union
 
-from shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME
+from shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME, FRENCH_NAME
 from connect import Connect
 from repositories.stored_query_repository import StoredQueryRepository
 
@@ -23,19 +23,11 @@ STORED_QUERY_REPO = StoredQueryRepository()
 def sql_query_input():
     return ui.page_fluid(
         ui.br(),
-        ui.h4(f"aperçu de {SELECTED_DATAFRAME_NAME.get()}"),
+        ui.output_ui("df_preview_title"),
         ui.output_data_frame("selected_df"),
         ui.hr(),
         ui.input_text_area("query", ui.h3("Entre vôtre requête SQL")),
-        ui.markdown(
-            f"""
-            ### À savoir
-            - sélectionnez une table **dans la barre latérale**.
-            - Vos requêtes seront exécutées sur la **table sélectionnée**.
-            - Remplacez le nom de la table par **'my_table'** dans vos requêtes.
-            - Utilisez les noms de colonnes dans l'aperçu de **{SELECTED_DATAFRAME_NAME.get()}**
-            """
-        ),
+        ui.output_ui("get_tips"),
         ui.input_action_button("exec", "lancer"),
         ui.output_ui("query_res_display"),
     )
@@ -266,6 +258,26 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                 # print("ui res list updated")
 
             differentiator.set(differentiator.get() + 1)
+
+    @render.text
+    def df_name():
+        return f"{FRENCH_NAME.get()}"
+
+    @render.ui
+    def df_preview_title():
+        return ui.h4(f"Aperçu de {FRENCH_NAME.get()}")
+
+    @render.ui
+    def get_tips():
+        return ui.markdown(
+            f"""
+            ### À savoir
+            - sélectionnez une table **dans la barre latérale**.
+            - Vos requêtes seront exécutées sur la **table sélectionnée**.
+            - Remplacez le nom de la table par **'my_table'** dans vos requêtes.
+            - Utilisez les noms de colonnes dans l'aperçu de **{FRENCH_NAME.get()}**
+            """
+        )
 
     def return_placeholders(pl_title: str, pl_text: str):
         @output(id=f"{differentiator.get()}")

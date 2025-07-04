@@ -1,10 +1,12 @@
 from shiny import module, ui, render, Inputs, Outputs, Session, reactive
+from great_tables import GT
 
 import polars as pl
 import matplotlib.pyplot as plt
 
 from shared import (
     AVAILABLE_RELS,
+    OTHER_RELS,
     SELECTED_PERIOD_LOW_BOUND,
     SELECTED_PERIOD_HIGH_BOUND,
 )
@@ -13,12 +15,24 @@ from shared import (
 @module.ui
 def salespersons_ui():
     return ui.page_fluid(
-        ui.h3(f"Revenus par vendeurs {SELECTED_PERIOD_LOW_BOUND.get()}"),
+        ui.h3("Revenus par vendeurs"),
         ui.hr(),
         ui.output_plot("display_salespersons_plot"),
         ui.h3(ui.output_text("display_sales_plot_text")),
         ui.hr(),
         ui.output_plot("display_sales_plot"),
+        ui.row(
+            ui.column(
+                6,
+                ui.h3("Nombre de ventes par clients"),
+                ui.output_ui("display_client_sales_df"),
+            ),
+            ui.column(
+                6,
+                ui.h3("Revenus par clients"),
+                ui.output_ui("display_client_revenue_df"),
+            ),
+        ),
     )
 
 
@@ -28,6 +42,13 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     def get_sale_order_filtered():
         return AVAILABLE_RELS.get()["sale_order"].filter(
             pl.col("date_order").is_between(
+                SELECTED_PERIOD_LOW_BOUND.get(), SELECTED_PERIOD_HIGH_BOUND.get()
+            )
+        )
+
+    def get_sale_order_line_filtered():
+        return OTHER_RELS.get()["sale_order_line"].filter(
+            pl.col("create_date").is_between(
                 SELECTED_PERIOD_LOW_BOUND.get(), SELECTED_PERIOD_HIGH_BOUND.get()
             )
         )
@@ -104,3 +125,38 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     @render.text
     def display_sales_plot_text():
         return f"Ventes (du {SELECTED_PERIOD_LOW_BOUND.get()} au {SELECTED_PERIOD_HIGH_BOUND.get()})"
+
+    @reactive.calc
+    def get_client_df():
+        sale_order_line = get_sale_order_line_filtered()
+
+        clients_ranked = (
+            sale_order_line.select("customer", "id")
+            .group_by("customer")
+            .agg(pl.col("id").count())
+            .sort(by="id", descending=True)
+            .rename({"id": "commandes"})
+        )
+
+        return GT(clients_ranked)
+
+    @render.ui
+    def display_client_sales_df():
+        return get_client_df()
+
+    @reactive.calc
+    def get_client_revenue_df():
+        sale_order_line = get_sale_order_line_filtered()
+
+        clients_ranked = (
+            sale_order_line.select("customer", "price_total")
+            .group_by("customer")
+            .agg(pl.col("price_total").sum())
+            .sort(by="price_total", descending=True)
+        )
+
+        return GT(clients_ranked)
+
+    @render.ui
+    def display_client_revenue_df():
+        return get_client_revenue_df()

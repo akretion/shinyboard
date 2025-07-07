@@ -1,15 +1,22 @@
-from shiny import module, ui, render, Inputs, Outputs, Session, reactive
-from great_tables import GT
+from __future__ import annotations
 
+import plotly.express as px
 import polars as pl
-import matplotlib.pyplot as plt
-
-from shared import (
-    AVAILABLE_RELS,
-    OTHER_RELS,
-    SELECTED_PERIOD_LOW_BOUND,
-    SELECTED_PERIOD_HIGH_BOUND,
-)
+from great_tables import GT
+from shared import AVAILABLE_RELS
+from shared import OTHER_RELS
+from shared import SELECTED_PERIOD_HIGH_BOUND
+from shared import SELECTED_PERIOD_LOW_BOUND
+from shared import TABLE_TIME_COLUMNS
+from shiny import Inputs
+from shiny import module
+from shiny import Outputs
+from shiny import reactive
+from shiny import render
+from shiny import Session
+from shiny import ui
+from shinywidgets import output_widget
+from shinywidgets import render_widget
 
 
 @module.ui
@@ -17,10 +24,10 @@ def salespersons_ui():
     return ui.page_fluid(
         ui.h3("Revenus par vendeurs"),
         ui.hr(),
-        ui.output_plot("display_salespersons_plot"),
+        output_widget("display_salespersons_plot"),
         ui.h3(ui.output_text("display_sales_plot_text")),
         ui.hr(),
-        ui.output_plot("display_sales_plot"),
+        output_widget("display_sales_plot"),
         ui.row(
             ui.column(
                 6,
@@ -41,19 +48,20 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_sale_order_filtered():
         return AVAILABLE_RELS.get()["sale_order"].filter(
-            pl.col("date_order").is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(), SELECTED_PERIOD_HIGH_BOUND.get()
-            )
+            pl.col(TABLE_TIME_COLUMNS.get()["sale_order"]).is_between(
+                SELECTED_PERIOD_LOW_BOUND.get(),
+                SELECTED_PERIOD_HIGH_BOUND.get(),
+            ),
         )
 
     def get_sale_order_line_filtered():
         return OTHER_RELS.get()["sale_order_line"].filter(
             pl.col("create_date").is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(), SELECTED_PERIOD_HIGH_BOUND.get()
-            )
+                SELECTED_PERIOD_LOW_BOUND.get(),
+                SELECTED_PERIOD_HIGH_BOUND.get(),
+            ),
         )
 
-    @reactive.calc
     def get_salespersons_plot():
         sale_order = get_sale_order_filtered()
 
@@ -75,9 +83,11 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
                 .to_list()
             )
 
-            fig, axes = plt.subplots()
-
-            axes.barh(x_data, y_data)
+            fig = px.bar(
+                title="Revenus par vendeurs",
+                x=x_data,
+                y=y_data,
+            )
 
             return fig
 
@@ -86,39 +96,38 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
         except Exception as EX:
             print(EX)
 
-    @render.plot(
-        alt="Revenus par vendeurs : Aucune donnée trouvée avec les filtres choisis... Essayez de les changer !"
-    )
+    @render_widget  # type: ignore
     def display_salespersons_plot():
         return get_salespersons_plot()
 
     @reactive.calc
     def get_sales_plot():
         sale_order = get_sale_order_filtered()
-
-        first_and_last_tick: list = [
-            SELECTED_PERIOD_LOW_BOUND.get(),
-            SELECTED_PERIOD_HIGH_BOUND.get(),
-        ]
         data = (
             sale_order.select("date_order", "sale_order")
             .group_by("date_order")
             .agg(pl.count("sale_order"))
             .sort(by="date_order", descending=False)
-            .to_series()
-            .to_list()
         )
 
-        fig, axes = plt.subplots()
-
-        axes.plot(data)
-        axes.set_yticks(first_and_last_tick)
+        fig = px.line(
+            data_frame=data.cast(
+                {
+                    "date_order": pl.String,
+                },
+            ).rename(
+                {
+                    "sale_order": "nombre de ventes",
+                    "date_order": "date de vente",
+                }
+            ),
+            x="date de vente",
+            y="nombre de ventes",
+        )
 
         return fig
 
-    @render.plot(
-        alt="Ventes de la période sélectionée : aucune vente trouvée avec les filtres choisis... Essayez de les changer !"
-    )
+    @render_widget  # type: ignore
     def display_sales_plot():
         return get_sales_plot()
 

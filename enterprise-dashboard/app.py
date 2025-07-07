@@ -1,27 +1,31 @@
-from shiny import App, reactive, render, ui
-from shiny import Inputs, Outputs, Session
+from __future__ import annotations
 
-from connect import Connect
-import sales_module.module
+import configparser
 
 import polars as pl
-
-
+import sales_module.module
 import sales_module.sales
-from shared import (
-    CURRENT_USER_ID,
-    CURRENT_USER_NAME,
-    AVAILABLE_RELS,
-    SELECTED_DATAFRAME_NAME,
-    FRENCH_NAME,
-    SELECTED_PERIOD_LOW_BOUND,
-    SELECTED_PERIOD_HIGH_BOUND,
-    MIN_DB_TIME,
-    MAX_DB_TIME,
-    OTHER_RELS,
-)
 import sql_query_input
 import stored_queries_page
+from connect import Connect
+from shared import AVAILABLE_RELS
+from shared import CURRENT_USER_ID
+from shared import CURRENT_USER_NAME
+from shared import FRENCH_NAME
+from shared import MAX_DB_TIME
+from shared import MIN_DB_TIME
+from shared import OTHER_RELS
+from shared import SELECTED_DATAFRAME_NAME
+from shared import SELECTED_PERIOD_HIGH_BOUND
+from shared import SELECTED_PERIOD_LOW_BOUND
+from shared import TABLE_TIME_COLUMNS
+from shiny import App
+from shiny import Inputs
+from shiny import Outputs
+from shiny import reactive
+from shiny import render
+from shiny import Session
+from shiny import ui
 
 
 app_ui = ui.page_sidebar(
@@ -66,7 +70,9 @@ def app_server(input: Inputs, output: Outputs, session: Session):
         else:
             return ui.div(
                 ui.input_text(
-                    "login", ui.span("Login"), placeholder="identifiant en minuscule"
+                    "login",
+                    ui.span("Login"),
+                    placeholder="identifiant en minuscule",
                 ),
                 ui.input_password("password", ui.span("Mot de passe")),
                 ui.input_action_button("login_button", "Se connecter"),
@@ -84,10 +90,10 @@ JOIN res_groups_users_rel
 ON ir_model_access.group_id = res_groups_users_rel.gid
 JOIN res_users
 ON res_users.id = res_groups_users_rel.uid
-WHERE ir_model.transient = FALSE 
+WHERE ir_model.transient = FALSE
 AND res_users.id = {in_logins.get()["user_id"]}
 AND ir_model.model !~ '.show$'
-            """
+            """,
         )
 
         # assignation des schémas dans shared
@@ -98,7 +104,8 @@ AND ir_model.model !~ '.show$'
             if(rel == "ir.actions.report"):
                 continue
             print(rel.replace(".", "_"))
-            table_name_schema_dict[rel.replace(".", "_")] = DB.read(f"SELECT * FROM {rel.replace(".", "_")}").schema
+            table_name_schema_dict[rel.replace(".", "_")] =
+            DB.read(f"SELECT * FROM {rel.replace(".", "_")}").schema
         """
 
         print(table_name_schema_dict)
@@ -110,7 +117,9 @@ AND ir_model.model !~ '.show$'
     def fallback():
         return ui.page_fluid(
             ui.h1("Connectez-vous à un utilisateur"),
-            ui.span("Cela vous permettra d'avoir accès à des indicateurs appropriés."),
+            ui.span(
+                "Cela vous permettra d'avoir accès à des indicateurs appropriés.",
+            ),
         )
 
     @reactive.effect
@@ -153,7 +162,7 @@ AND ir_model.model !~ '.show$'
                     ui.h2("génération d'indicateurs"),
                     ui.h1(f"Vous êtes connecté à {in_logins.get()['user']} !"),
                     ui.span(
-                        "Entrez des requêtes SQL pour générer des indicateurs visuels"
+                        "Entrez des requêtes SQL pour générer des indicateurs visuels",
                     ),
                     sql_query_input.sql_query_input("sql"),
                 ),
@@ -178,32 +187,63 @@ AND ir_model.model !~ '.show$'
         in_logins.set({"valid": False, "user": "", "user_id": -1})
 
     @reactive.effect
+    def set_table_times():
+        conf_parser = configparser.ConfigParser()
+        conf_parser.read("dbconfig.ini")
+
+        try:
+            TABLE_TIME = conf_parser["TABLE_TIMES"]
+            new_dict = {}
+
+            for name, value in TABLE_TIME.items():
+                new_dict.update({name: value})
+
+            TABLE_TIME_COLUMNS.set(new_dict)
+
+        except Exception as EX:
+            print(
+                f"""an exception occured (see below)
+                \n-----EXCEPTION-----\n
+                {EX}\n-----END OF EXCEPTION-----""",
+            )
+            print(
+                "The above exception is most likely due to dbconfig.ini "
+                "sections or variables being invalid.",
+            )
+            print(
+                "Please check dbconfig.ini",
+            )
+
+    @reactive.effect
     def set_df_and_shared_values():
         #    print(available_tables(CURRENT_USER_ID.get(), DB))
+
+        # Columns [write_date] must be renamed, else it conflicts with joined tables.
         sale_order_joined = DB.read("""
         SELECT
             order_partner.name AS customer,
             order_user.name AS salesperson,
             sale_order.name AS sale_order,
-            sale_order.create_date::date AS sale_order_create_date,
             sale_order.company_id AS sale_order_company_id,
             sale_order.user_id AS sale_order_user_id,
             sale_order.write_uid AS write_uid,
-            sale_order.write_date::date AS write_date,
             sale_order.invoice_status,
             sale_order.state,
             sale_order.amount_total,
             sale_order.amount_tax,
             sale_order.date_order::date,
+            sale_order.create_date::date AS sale_order_create_date,
+            sale_order.write_date::date AS sale_order_write_date,
             sale_order.require_payment,
-            sale_order.require_signature
+            sale_order.require_signature,
+            sale_order.id AS id
 
         FROM sale_order
-                                    
-        JOIN res_partner AS order_partner 
+
+        JOIN res_partner AS order_partner
         ON sale_order.partner_id = order_partner.id
-                                    
-        JOIN res_partner AS order_user 
+
+        JOIN res_partner AS order_user
         ON sale_order.user_id = order_user.user_id
         """)
 
@@ -217,12 +257,12 @@ AND ir_model.model !~ '.show$'
             purchase_order.write_uid AS purchase_order_write_uid,
             purchase_order.write_date AS purchase_order_write_date
 
-        FROM purchase_order 
+        FROM purchase_order
 
-        JOIN res_partner 
+        JOIN res_partner
         ON purchase_order.partner_id = res_partner.id
-                                        
-        """
+
+        """,
         )
 
         res_company = DB.read("""SELECT * FROM res_company""")
@@ -231,19 +271,20 @@ AND ir_model.model !~ '.show$'
 
         MIN_DB_TIME.set(
             sale_order_joined.sql(
-                """SELECT MIN(date_order) AS min FROM self"""
-            ).to_dict()["min"][0]
+                """SELECT MIN(date_order) AS min FROM self""",
+            ).to_dict()["min"][0],
         )
         MAX_DB_TIME.set(
             sale_order_joined.sql(
-                """SELECT MAX(date_order) + interval '1 day' AS max FROM self"""
-            ).to_dict()["max"][0]
+                """SELECT MAX(date_order) + interval '1 day' AS max FROM self""",
+            ).to_dict()["max"][0],
         )
 
         sale_order_line = DB.read(
             """
             SELECT
                 sol.id,
+                order_id,
                 sol.name AS name,
                 product_category.complete_name AS category,
                 res_partner.name AS customer,
@@ -265,17 +306,22 @@ AND ir_model.model !~ '.show$'
 
             JOIN product_category
             ON product_template.categ_id = product_category.id
-            """
+            """,
         )
 
-        OTHER_RELS.set({"sale_order_line": sale_order_line, "res_company": res_company})
+        OTHER_RELS.set(
+            {
+                "sale_order_line": sale_order_line,
+                "res_company": res_company,
+            }
+        )
 
         AVAILABLE_RELS.set(
             {
                 "sale_order": sale_order_joined,
                 "purchase_order": purchase_order_joined,
                 "res_partner": res_partner,
-            }
+            },
         )
 
     @render.ui
@@ -299,7 +345,7 @@ AND ir_model.model !~ '.show$'
                     [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
                     time_format="%Y-%m-%d",
                     drag_range=True,
-                )
+                ),
             )
 
     @reactive.effect

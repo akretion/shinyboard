@@ -1,11 +1,17 @@
-from shiny import reactive
+"""
+File that contains states and informations that
+should be shared across files.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
 
 import polars as pl
 import sqlglot.expressions
-from datetime import datetime
-
 from connect import Connect
 from peewee import PostgresqlDatabase
+from shiny import reactive
 
 
 # CONSTANTS
@@ -31,10 +37,10 @@ def available_tables(uid: int, connection: Connect):
         ON ir_model_access.group_id = res_groups_users_rel.gid
         JOIN res_users
         ON res_users.id = res_groups_users_rel.uid
-        WHERE ir_model.transient = FALSE 
+        WHERE ir_model.transient = FALSE
         AND res_users.id = {uid}
         AND ir_model.model !~ '.show$'
-        """
+        """,
     )
 
     # assignation des schémas dans shared
@@ -47,16 +53,25 @@ def available_tables(uid: int, connection: Connect):
 # DATAFRAME DATA
 
 AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-"""Available to the user"""
+# tables available to the user.
 
 SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
+# Holds the cannonical, in DB name of the currently selected table.
+
 FRENCH_NAME: reactive.value[str] = reactive.value("")
+# Holds the french name of the currently selected table.
 
 MIN_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
+# Minimum time found in database.
+
 MAX_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
+# Maximum time found in database.
 
 OTHER_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-"""Available for internal use"""
+# tables available for internal use.
+
+TABLE_TIME_COLUMNS: reactive.value[dict[str, str]] = reactive.value()
+# Associates table names to their respective columns that should be used for time calculations.
 
 # DATAFRAME RELATED DATA
 
@@ -66,18 +81,24 @@ COMPANY_TO_ID_DICT: reactive.value[dict]
 # GLOBAL USER FILTERS
 
 SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
-SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
+# The rightmost value of the date_range.
 
+SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
+# The leftmost value of the data_range.
 
 # UTILS
+
+
 def parse_postgres(q: str):
-    """checks if the query is valid postgres"""
+    """checks if the query is valid postgres."""
     try:
         expr = sqlglot.parse_one(q, read="postgres")
 
         # cases not detected by sqlglot
         if isinstance(expr, sqlglot.expressions.Select) and not expr.expressions:
-            raise sqlglot.ParseError("Incomplete SELECT statement, no column specified")
+            raise sqlglot.ParseError(
+                "Incomplete SELECT statement, no column specified",
+            )
 
         return True
 

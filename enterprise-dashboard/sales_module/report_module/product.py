@@ -1,17 +1,28 @@
-from shiny import module, Inputs, Outputs, Session, reactive, ui, render
+from __future__ import annotations
 
-import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 import polars as pl
-
-from shared import (
-    OTHER_RELS,
-    SELECTED_PERIOD_LOW_BOUND,
-    SELECTED_PERIOD_HIGH_BOUND,
-)
+from plotly.graph_objects import Figure
+from plotly.graph_objects import FigureWidget
+from shared import AVAILABLE_RELS
+from shared import OTHER_RELS
+from shared import SELECTED_PERIOD_HIGH_BOUND
+from shared import SELECTED_PERIOD_LOW_BOUND
+from shared import TABLE_TIME_COLUMNS
+from shiny import Inputs
+from shiny import module
+from shiny import Outputs
+from shiny import reactive
+from shiny import render
+from shiny import Session
+from shiny import ui
+from shinywidgets import output_widget
+from shinywidgets import render_plotly
 
 
 # TODO
-## Donner un choix de graphe aux utilisateurs
+# Donner un choix de graphe aux utilisateurs
 
 
 @module.ui
@@ -24,29 +35,31 @@ def product_ui():
                 7,
                 ui.card(
                     ui.card_header(ui.h3("par revenu")),
-                    ui.card_body(ui.output_ui("display_trending_category_revenue")),
+                    ui.card_body(
+                        ui.output_ui(
+                            "display_trending_category_revenue",
+                        ),
+                    ),
                 ),
             ),
             ui.column(
                 5,
                 ui.card(
                     ui.card_header(ui.h3("par unités vendues")),
-                    ui.card_body(ui.output_ui("display_trending_category_units_sold")),
+                    ui.card_body(
+                        ui.output_ui(
+                            "display_trending_category_units_sold",
+                        ),
+                    ),
                 ),
             ),
         ),
         ui.h2("Ventes de produits"),
         ui.hr(),
-        ui.row(
-            ui.column(
-                6, ui.h3("par revenus générés"), ui.output_plot("display_product_plot")
-            ),
-            ui.column(
-                6,
-                ui.h3("par unités vendues"),
-                ui.output_plot("display_best_sellers_by_qty"),
-            ),
-        ),
+        ui.h3("par revenus générés"),
+        output_widget("display_product_plot"),
+        ui.h3("par unités vendues"),
+        output_widget("display_best_sellers_by_qty"),
     )
 
 
@@ -54,9 +67,17 @@ def product_ui():
 def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_sale_order_line_filtered():
-        return OTHER_RELS.get()["sale_order_line"].filter(
-            pl.col("create_date").is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(), SELECTED_PERIOD_HIGH_BOUND.get()
+        return (
+            OTHER_RELS.get()["sale_order_line"]
+            .join_where(
+                AVAILABLE_RELS.get()["sale_order"],
+                pl.col("order_id") == pl.col("id_right"),
+            )
+            .filter(
+                pl.col(f"{TABLE_TIME_COLUMNS.get()['sale_order']}").is_between(
+                    SELECTED_PERIOD_LOW_BOUND.get(),
+                    SELECTED_PERIOD_HIGH_BOUND.get(),
+                ),
             )
         )
 
@@ -73,21 +94,31 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
         )
 
         x_data: list[str] = infos.select("name").to_series().to_list()
-        y_data: list[int] = infos.select("product_uom_qty").to_series().to_list()
+        y_data: list[int] = (
+            infos.select(
+                "product_uom_qty",
+            )
+            .to_series()
+            .to_list()
+        )
 
-        plt.barh(x_data, y_data)
+        return px.bar(x=x_data, y=y_data)
 
-    @render.plot
+    @render_plotly  # type: ignore
     def display_best_sellers_by_qty():
         return get_best_sellers_by_qty()
 
-    @reactive.calc
     def get_product_plot():
         try:
             sale_order_line = get_sale_order_line_filtered()
 
             sale_order_line_grouped = (
-                sale_order_line.select("name", "product_uom_qty", "price_unit", "id")
+                sale_order_line.select(
+                    "name",
+                    "product_uom_qty",
+                    "price_unit",
+                    "id",
+                )
                 .group_by("name")
                 .agg(
                     pl.col("price_unit").sum(),
@@ -97,32 +128,79 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
                 .select("name", "product_uom_qty", "price_unit")
             )
 
-            x_data = sale_order_line_grouped.select("price_unit").to_series().to_list()
-            name_labels = sale_order_line_grouped.select("name").to_series().to_list()
+            name_labels = (
+                sale_order_line_grouped.select(
+                    "name",
+                )
+                .to_series()
+                .to_list()
+            )
             qty_ordered_labels = (
-                sale_order_line_grouped.select("price_unit").to_series().to_list()
+                sale_order_line_grouped.select(
+                    "price_unit",
+                )
+                .to_series()
+                .to_list()
             )
 
             labels: list[str] = []
 
             for i in range(len(name_labels)):
                 labels.append(
-                    f"{name_labels[i]}\nrevenue:{int(qty_ordered_labels[i])}€"
+                    f"{name_labels[i]}\nrevenue:{int(qty_ordered_labels[i])}€",
                 )
 
+            """
             plt.pie(x=x_data)
             plt.legend(labels, loc="best", bbox_to_anchor=(1, 1))
             plt.tight_layout()
+            """
+            print(sale_order_line_grouped)
+
+            fig: FigureWidget | Figure = px.pie(
+                sale_order_line_grouped,
+                values="price_unit",
+                names="name",
+                width=1200,
+                height=800,
+            )
+            fig.update_layout(
+                legend=dict(
+                    x=1,
+                    y=0,
+                    traceorder="reversed",
+                    title_font_family=None,
+                    font=dict(
+                        family=None,
+                        size=15,
+                        color="black",
+                    ),
+                    bgcolor="LightSteelBlue",
+                    bordercolor="Black",
+                    borderwidth=1,
+                ),
+            )
+
+            fig: FigureWidget | Figure = go.FigureWidget(fig.data, fig.layout)
+
+            fig.data[0].on_click(handle_click)  # type: ignore
+
+            return fig
 
         except KeyError as KE:
-            print(KE)
+            print(
+                f"as KeyError has occured, it most likely means the table you're trying to access isn't available.\n------EXCEPTIONc\n{KE}\n------ENF OF EXCEPTION------",
+            )
 
         except Exception as EX:
             print(EX)
 
-    @render.plot
+    @render_plotly  # type: ignore
     def display_product_plot():
         return get_product_plot()
+
+    def handle_click(trace, points, state):
+        print("TEST")
 
     @reactive.calc
     def get_trending_category_units_sold():

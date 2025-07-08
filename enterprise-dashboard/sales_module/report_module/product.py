@@ -20,7 +20,6 @@ from shiny import ui
 from shinywidgets import output_widget
 from shinywidgets import render_plotly
 
-
 # TODO
 # Donner un choix de graphe aux utilisateurs
 
@@ -57,7 +56,8 @@ def product_ui():
         ui.h2("Ventes de produits"),
         ui.hr(),
         ui.h3("par revenus générés"),
-        output_widget("display_product_plot"),
+        # ui.a(output_widget("display_product_plot"), href=f''),
+        ui.output_ui("product_plot_widget"),
         ui.h3("par unités vendues"),
         output_widget("display_best_sellers_by_qty"),
     )
@@ -65,6 +65,15 @@ def product_ui():
 
 @module.server
 def product_server(inputs: Inputs, outputs: Outputs, session: Session):
+    link: reactive.value[str] = reactive.value("http://localhost:8069/odoo/products/0")
+
+    @render.ui
+    def product_plot_widget():
+        return (ui.a(output_widget("display_product_plot"), href=f"{link.get()}"),)
+
+    def get_product_product():
+        return OTHER_RELS.get()["product_product"]
+
     @reactive.calc
     def get_sale_order_line_filtered():
         return (
@@ -155,7 +164,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             plt.legend(labels, loc="best", bbox_to_anchor=(1, 1))
             plt.tight_layout()
             """
-            print(sale_order_line_grouped)
 
             fig: FigureWidget | Figure = px.pie(
                 sale_order_line_grouped,
@@ -183,7 +191,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
 
             fig: FigureWidget | Figure = go.FigureWidget(fig.data, fig.layout)
 
-            fig.data[0].on_click(handle_click)  # type: ignore
+            fig.data[0].on_hover(handle_hover)  # type: ignore
 
             return fig
 
@@ -199,8 +207,28 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     def display_product_plot():
         return get_product_plot()
 
-    def handle_click(trace, points, state):
-        print("TEST")
+    def handle_hover(trace, points, state):
+        product_template = get_product_product()
+
+        labels = trace.labels
+        selected = f"{labels[points.point_inds[0]]}"
+
+        split = selected.split("]")
+
+        if split:
+            selected = split[0].strip().replace("[", "")
+
+            my_id = (
+                product_template.filter(pl.col("default_code").eq(f"{selected}"))
+                .select("id")
+                .to_series()
+                .to_list()
+            )
+
+            link.set(f"http://localhost:8069/odoo/products/{my_id[0]}")
+
+        else:
+            print("this looks like a service, not a product...")
 
     @reactive.calc
     def get_trending_category_units_sold():

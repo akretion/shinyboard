@@ -309,8 +309,18 @@ AND ir_model.model !~ '.show$'
             """,
         )
 
+        product_product = DB.read(
+            """
+            SELECT
+                id,
+                default_code
+            FROM product_product
+            """
+        )
+
         OTHER_RELS.set(
             {
+                "product_product": product_product,
                 "sale_order_line": sale_order_line,
                 "res_company": res_company,
             }

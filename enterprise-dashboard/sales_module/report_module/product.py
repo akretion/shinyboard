@@ -9,6 +9,7 @@ from shared import AVAILABLE_RELS
 from shared import OTHER_RELS
 from shared import SELECTED_PERIOD_HIGH_BOUND
 from shared import SELECTED_PERIOD_LOW_BOUND
+from shared import SELECTED_COMPANY_NAMES
 from shared import TABLE_TIME_COLUMNS
 from shiny import Inputs
 from shiny import module
@@ -56,7 +57,8 @@ def product_ui():
         ui.h2("Ventes de produits"),
         ui.hr(),
         ui.h3("par revenus générés"),
-        # ui.a(output_widget("display_product_plot"), href=f''),
+        output_widget("display_product_plot"),
+        ui.output_ui("redirect_script"),
         ui.output_ui("product_plot_widget"),
         ui.h3("par unités vendues"),
         output_widget("display_best_sellers_by_qty"),
@@ -66,10 +68,9 @@ def product_ui():
 @module.server
 def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     link: reactive.value[str] = reactive.value("http://localhost:8069/odoo/products/0")
+    redirecting_script: reactive.value[str] = reactive.value("")
 
-    @render.ui
-    def product_plot_widget():
-        return (ui.a(output_widget("display_product_plot"), href=f"{link.get()}"),)
+    graph_types: reactive.value[dict[str, str]] = reactive.value()
 
     def get_product_product():
         return OTHER_RELS.get()["product_product"]
@@ -87,6 +88,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
                     SELECTED_PERIOD_LOW_BOUND.get(),
                     SELECTED_PERIOD_HIGH_BOUND.get(),
                 ),
+                pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
             )
         )
 
@@ -111,11 +113,38 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             .to_list()
         )
 
-        return px.bar(x=x_data, y=y_data)
+        return {"x": x_data, "y": y_data}
 
     @render_plotly  # type: ignore
     def display_best_sellers_by_qty():
+        graph_type = graph_types.get()["best_sellers_qty"]
+        data: dict[str, list[str]] = get_best_sellers_by_qty()
+
+        match graph_type:
+            case "bar":
+                return px.bar(x=data["x"], y=data["y"])
+            case "bubble":
+                return go.Figure(
+                    data=[
+                        go.Scatter(
+                            x=data["x"],
+                            y=data["y"],
+                            mode="markers",
+                            marker_size=[40, 60, 80, 100],
+                        )
+                    ]
+                )
+            case _:
+                return px.bar(x=data["x"], y=data["y"])
+
         return get_best_sellers_by_qty()
+
+    @render.ui
+    def best_sellers_qty_graph_choice():
+        return ui.row(
+            ui.input_action_button("best_sellers_qty_bar", ui.span("en barres")),
+            ui.input_action_button("best_sellers_qty_bubble", ui.span("en bulles")),
+        )
 
     def get_product_plot():
         try:
@@ -159,12 +188,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
                     f"{name_labels[i]}\nrevenue:{int(qty_ordered_labels[i])}€",
                 )
 
-            """
-            plt.pie(x=x_data)
-            plt.legend(labels, loc="best", bbox_to_anchor=(1, 1))
-            plt.tight_layout()
-            """
-
             fig: FigureWidget | Figure = px.pie(
                 sale_order_line_grouped,
                 values="price_unit",
@@ -191,13 +214,13 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
 
             fig: FigureWidget | Figure = go.FigureWidget(fig.data, fig.layout)
 
-            fig.data[0].on_hover(handle_hover)  # type: ignore
+            fig.data[0].on_click(handle_click)  # type: ignore
 
             return fig
 
         except KeyError as KE:
             print(
-                f"as KeyError has occured, it most likely means the table you're trying to access isn't available.\n------EXCEPTIONc\n{KE}\n------ENF OF EXCEPTION------",
+                f"as KeyError has occurred, it most likely means the table you're trying to access isn't available.\n------EXCEPTIONc\n{KE}\n------ENF OF EXCEPTION------",
             )
 
         except Exception as EX:
@@ -207,7 +230,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     def display_product_plot():
         return get_product_plot()
 
-    def handle_hover(trace, points, state):
+    def handle_click(trace, points, state):
         product_template = get_product_product()
 
         labels = trace.labels
@@ -220,15 +243,24 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
 
             my_id = (
                 product_template.filter(pl.col("default_code").eq(f"{selected}"))
-                .select("id")
+                .select("product_tmpl_id")
                 .to_series()
                 .to_list()
             )
 
             link.set(f"http://localhost:8069/odoo/products/{my_id[0]}")
+            redirecting_script.set(f"""
+            window.open('{link.get()}', '_blank')
+            """)
 
         else:
             print("this looks like a service, not a product...")
+
+    @render.ui
+    def redirect_script():
+        return ui.tags.script(f"""
+        {redirecting_script.get()}
+        """)
 
     @reactive.calc
     def get_trending_category_units_sold():

@@ -19,6 +19,7 @@ from shared import SELECTED_DATAFRAME_NAME
 from shared import SELECTED_PERIOD_HIGH_BOUND
 from shared import SELECTED_PERIOD_LOW_BOUND
 from shared import TABLE_TIME_COLUMNS
+from shared import SELECTED_COMPANY_NAMES
 from shiny import App
 from shiny import Inputs
 from shiny import Outputs
@@ -82,7 +83,7 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     def available_tables():
         available_tables_df = DB.read(
             f"""
- SELECT ir_model.model AS table_name
+SELECT ir_model.model AS table_name
 FROM ir_model
 JOIN ir_model_access
 ON ir_model.id = ir_model_access.model_id
@@ -202,7 +203,7 @@ AND ir_model.model !~ '.show$'
 
         except Exception as EX:
             print(
-                f"""an exception occured (see below)
+                f"""an exception occurred (see below)
                 \n-----EXCEPTION-----\n
                 {EX}\n-----END OF EXCEPTION-----""",
             )
@@ -224,7 +225,7 @@ AND ir_model.model !~ '.show$'
             order_partner.name AS customer,
             order_user.name AS salesperson,
             sale_order.name AS sale_order,
-            sale_order.company_id AS sale_order_company_id,
+            order_company.name AS company,
             sale_order.user_id AS sale_order_user_id,
             sale_order.write_uid AS write_uid,
             sale_order.invoice_status,
@@ -245,12 +246,16 @@ AND ir_model.model !~ '.show$'
 
         JOIN res_partner AS order_user
         ON sale_order.user_id = order_user.user_id
+
+        JOIN res_company AS order_company
+        ON sale_order.company_id = order_company.id
         """)
 
         purchase_order_joined = DB.read(
             """
         SELECT
             purchase_order.name AS purchase_order_name,
+            purchase_company.name AS company,
             purchase_order.create_date AS purchase_order_create_date,
             purchase_order.company_id AS purchase_order_company_id,
             purchase_order.user_id AS purchase_order_user_id,
@@ -262,6 +267,8 @@ AND ir_model.model !~ '.show$'
         JOIN res_partner
         ON purchase_order.partner_id = res_partner.id
 
+        JOIN res_company AS purchase_company
+        ON purchase_order.company_id = purchase_company.id
         """,
         )
 
@@ -286,6 +293,7 @@ AND ir_model.model !~ '.show$'
                 sol.id,
                 order_id,
                 sol.name AS name,
+                order_line_company.name AS company,
                 product_category.complete_name AS category,
                 res_partner.name AS customer,
                 product_uom_qty,
@@ -306,13 +314,16 @@ AND ir_model.model !~ '.show$'
 
             JOIN product_category
             ON product_template.categ_id = product_category.id
+
+            JOIN res_company AS order_line_company
+            ON sol.company_id = order_line_company.id
             """,
         )
 
         product_product = DB.read(
             """
             SELECT
-                id,
+                product_tmpl_id,
                 default_code
             FROM product_product
             """
@@ -346,17 +357,41 @@ AND ir_model.model !~ '.show$'
     @render.ui
     def user_filters():
         if is_logged_in.get():
-            return ui.span(
-                ui.input_slider(
-                    "date_range",
-                    ui.span("sélection de date"),
-                    MIN_DB_TIME.get(),
-                    MAX_DB_TIME.get(),
-                    [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
-                    time_format="%Y-%m-%d",
-                    drag_range=True,
-                ),
+            res_companies = (
+                OTHER_RELS.get()["res_company"].select("name").to_series().to_list()
             )
+
+            if len(res_companies) < 1:
+                return ui.span(
+                    ui.input_slider(
+                        "date_range",
+                        ui.h4("Sélection de date"),
+                        MIN_DB_TIME.get(),
+                        MAX_DB_TIME.get(),
+                        [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                        time_format="%Y-%m-%d",
+                        drag_range=True,
+                    )
+                )
+            else:
+                return ui.span(
+                    ui.input_slider(
+                        "date_range",
+                        ui.h4("Sélection de date"),
+                        MIN_DB_TIME.get(),
+                        MAX_DB_TIME.get(),
+                        [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                        time_format="%Y-%m-%d",
+                        drag_range=True,
+                    ),
+                    ui.input_selectize(
+                        "company_name",
+                        ui.h4("Sélection d'entreprise"),
+                        res_companies,
+                        selected=res_companies[0],
+                        multiple=True,
+                    ),
+                )
 
     @reactive.effect
     @reactive.event(input.df_radio_buttons)
@@ -371,6 +406,11 @@ AND ir_model.model !~ '.show$'
 
         SELECTED_PERIOD_LOW_BOUND.set(values[0])
         SELECTED_PERIOD_HIGH_BOUND.set(values[1])
+
+    @reactive.effect
+    @reactive.event(input.company_name)
+    def company_name_handler():
+        SELECTED_COMPANY_NAMES.set(input.company_name())
 
 
 app = App(app_ui, app_server)

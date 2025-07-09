@@ -56,7 +56,7 @@ AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
 # tables available to the user.
 
 SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
-# Holds the cannonical, in DB name of the currently selected table.
+# Holds the canonical, in DB name of the currently selected table.
 
 FRENCH_NAME: reactive.value[str] = reactive.value("")
 # Holds the french name of the currently selected table.
@@ -73,10 +73,6 @@ OTHER_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
 TABLE_TIME_COLUMNS: reactive.value[dict[str, str]] = reactive.value()
 # Associates table names to their respective columns that should be used for time calculations.
 
-# DATAFRAME RELATED DATA
-
-COMPANY_TO_ID_DICT: reactive.value[dict]
-
 
 # GLOBAL USER FILTERS
 
@@ -86,9 +82,11 @@ SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
 SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
 # The leftmost value of the data_range.
 
+SELECTED_COMPANY_NAMES: reactive.value[list[str]] = reactive.value([""])
+# The selected value of the company selection dropdown
+
+
 # UTILS
-
-
 def parse_postgres(q: str):
     """checks if the query is valid postgres."""
     try:

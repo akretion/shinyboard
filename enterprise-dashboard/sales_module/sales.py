@@ -7,6 +7,7 @@ from shared import AVAILABLE_RELS
 from shared import EPOCH
 from shared import SELECTED_PERIOD_HIGH_BOUND
 from shared import SELECTED_PERIOD_LOW_BOUND
+from shared import SELECTED_COMPANY_NAMES
 from shared import TABLE_TIME_COLUMNS
 from shiny import Inputs
 from shiny import module
@@ -28,6 +29,8 @@ def sales_server(inputs: Inputs, outputs: Outputs, session: Session):
     def get_sale_order():
         try:
             sale_order_df = AVAILABLE_RELS.get()["sale_order"]
+            print(sale_order_df)
+            print(SELECTED_COMPANY_NAMES.get())
 
             if SELECTED_PERIOD_HIGH_BOUND.get() != EPOCH:  # to avoid errors
                 return GT(
@@ -36,6 +39,7 @@ def sales_server(inputs: Inputs, outputs: Outputs, session: Session):
                             SELECTED_PERIOD_LOW_BOUND.get(),
                             SELECTED_PERIOD_HIGH_BOUND.get(),
                         ),
+                        pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
                     ),
                 ).tab_header(title=md("# Les ventes"), subtitle=md("toutes confondues"))
             else:

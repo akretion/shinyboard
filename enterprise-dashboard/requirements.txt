@@ -8,4 +8,7 @@ polars
 psycopg2
 seaborn
 shiny
+shinywidgets
+pyarrow
+connectorx
 sqlglot

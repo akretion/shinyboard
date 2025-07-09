@@ -8,6 +8,7 @@ from shared import OTHER_RELS
 from shared import SELECTED_PERIOD_HIGH_BOUND
 from shared import SELECTED_PERIOD_LOW_BOUND
 from shared import TABLE_TIME_COLUMNS
+from shared import SELECTED_COMPANY_NAMES
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -52,6 +53,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
                 SELECTED_PERIOD_LOW_BOUND.get(),
                 SELECTED_PERIOD_HIGH_BOUND.get(),
             ),
+            pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
         )
 
     def get_sale_order_line_filtered():
@@ -60,6 +62,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
                 SELECTED_PERIOD_LOW_BOUND.get(),
                 SELECTED_PERIOD_HIGH_BOUND.get(),
             ),
+            pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
         )
 
     def get_salespersons_plot():

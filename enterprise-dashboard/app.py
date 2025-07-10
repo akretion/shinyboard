@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from main import _
 import configparser
 
 import polars as pl
@@ -44,13 +44,13 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     sql_query_input.sql_query_server("sql")
 
     translation = {
-        "Ventes": "sale_order",
-        "Achat": "purchase_order",
-        "Partenaires": "res_partner",
+        _("Sales"): "sale_order",
+        _("Purchases"): "purchase_order",
+        _("Partners"): "res_partner",
     }
 
     # CONSTANTS
-    DB = Connect("dsn2")
+    DB = Connect("dsn1")
     LOGINS = DB.read("SELECT id, login FROM res_users")
 
     # REACTIVE VARS - UI depends on them
@@ -64,8 +64,8 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     def credentials_input():
         if is_logged_in.get():
             return ui.div(
-                ui.h3(f"Connecté à {in_logins.get()['user']}"),
-                ui.input_action_button("disconnect", "Se déconnecter"),
+                ui.h3(f"{_('Connected as')} {in_logins.get()['user']}"),
+                ui.input_action_button("disconnect", _("Disconnect")),
             )
 
         else:
@@ -73,10 +73,10 @@ def app_server(input: Inputs, output: Outputs, session: Session):
                 ui.input_text(
                     "login",
                     ui.span("Login"),
-                    placeholder="identifiant en minuscule",
+                    placeholder=_("Lower identifier"),
                 ),
-                ui.input_password("password", ui.span("Mot de passe")),
-                ui.input_action_button("login_button", "Se connecter"),
+                ui.input_password("password", ui.span(_("Password"))),
+                ui.input_action_button("login_button", _("Log in")),
             )
 
     @render.ui
@@ -117,9 +117,9 @@ AND ir_model.model !~ '.show$'
     @render.ui
     def fallback():
         return ui.page_fluid(
-            ui.h1("Connectez-vous à un utilisateur"),
+            ui.h1(_("Log in to an Odoo user")),
             ui.span(
-                "Cela vous permettra d'avoir accès à des indicateurs appropriés.",
+                _("This will allow you to have access to appropriate indicators"),
             ),
         )
 
@@ -155,20 +155,20 @@ AND ir_model.model !~ '.show$'
             is_logged_in.set(True)
             return ui.page_navbar(
                 ui.nav_panel(
-                    ui.h2("ventes"),
+                    ui.h2("Sales"),
                     sales_module.module.module_ui("sales_mod"),
                     sales_module.module.module_server("sales_mod"),
                 ),
                 ui.nav_panel(
-                    ui.h2("génération d'indicateurs"),
-                    ui.h1(f"Vous êtes connecté à {in_logins.get()['user']} !"),
+                    ui.h2(_("Generate charts")),
+                    ui.h1(_("You're logged with {} !").format(in_logins.get()['user'])),
                     ui.span(
-                        "Entrez des requêtes SQL pour générer des indicateurs visuels",
+                        _("Enter SQL queries to generate visual indicators"),
                     ),
                     sql_query_input.sql_query_input("sql"),
                 ),
                 ui.nav_panel(
-                    ui.h2("requêtes stockées"),
+                    ui.h2(_("Queries")),
                     stored_queries_page.stored_queries_ui("stored"),
                     stored_queries_page.stored_queries_server("stored"),
                 ),
@@ -177,8 +177,8 @@ AND ir_model.model !~ '.show$'
 
         else:
             return ui.page_fluid(
-                ui.h1(f"Aucun utilisateur nommé {in_logins.get()['user']}"),
-                ui.span("Veuillez vérifier l'ortographe de vos informations"),
+                ui.h1(_(f"No user named {in_logins.get()['user']}")),
+                ui.span(_("Please check entered informations.")),
             )
 
     @reactive.effect
@@ -350,7 +350,7 @@ AND ir_model.model !~ '.show$'
         if is_logged_in.get():
             return ui.input_radio_buttons(
                 "df_radio_buttons",
-                ui.h3("sélectionnez une table"),
+                ui.h3(_("Data source")),
                 [name for name in translation.keys()],
             )
 

@@ -1,0 +1,86 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-10 20:51+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: app.py:46
+msgid "Sales"
+msgstr ""
+
+#: app.py:47
+msgid "Purchases"
+msgstr ""
+
+#: app.py:48
+msgid "Partners"
+msgstr ""
+
+#: app.py:67
+msgid "Disconnect"
+msgstr ""
+
+#: app.py:75
+msgid "Lower identifier"
+msgstr ""
+
+#: app.py:77
+msgid "Password"
+msgstr ""
+
+#: app.py:78
+msgid "Log in"
+msgstr ""
+
+#: app.py:119
+msgid "Log in to an Odoo user"
+msgstr ""
+
+#: app.py:121
+msgid "This will allow you to have access to appropriate indicators"
+msgstr ""
+
+#: app.py:162
+msgid "Generate charts"
+msgstr ""
+
+#: app.py:163
+msgid "You're logged with {} !"
+msgstr ""
+
+#: app.py:165
+msgid "Enter SQL queries to generate visual indicators"
+msgstr ""
+
+#: app.py:170
+msgid "Queries"
+msgstr ""
+
+#: app.py:179
+msgid "No user named {in_logins.get()['user']}"
+msgstr ""
+
+#: app.py:180
+msgid "Please check entered informations."
+msgstr ""
+
+#: app.py:342
+msgid "Data source"
+msgstr ""
+
+#: app.py:352
+msgid "Dates"
+msgstr ""

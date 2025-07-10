@@ -75,21 +75,11 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
                 .agg(pl.col("amount_total").sum())
             )
 
-            x_data: list[str] = (
-                sale_order_grouped_by_amount_tt.select("salesperson")
-                .to_series()
-                .to_list()
-            )
-            y_data: list[int] = (
-                sale_order_grouped_by_amount_tt.select("amount_total")
-                .to_series()
-                .to_list()
-            )
-
             fig = px.bar(
                 title="Revenus par vendeurs",
-                x=x_data,
-                y=y_data,
+                data_frame=sale_order_grouped_by_amount_tt,
+                x="salesperson",
+                y="amount_total",
             )
 
             return fig
@@ -113,7 +103,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
             .sort(by="date_order", descending=False)
         )
 
-        fig = px.line(
+        fig = px.area(
             data_frame=data.cast(
                 {
                     "date_order": pl.String,

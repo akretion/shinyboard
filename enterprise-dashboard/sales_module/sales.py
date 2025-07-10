@@ -29,8 +29,6 @@ def sales_server(inputs: Inputs, outputs: Outputs, session: Session):
     def get_sale_order():
         try:
             sale_order_df = AVAILABLE_RELS.get()["sale_order"]
-            print(sale_order_df)
-            print(SELECTED_COMPANY_NAMES.get())
 
             if SELECTED_PERIOD_HIGH_BOUND.get() != EPOCH:  # to avoid errors
                 return GT(

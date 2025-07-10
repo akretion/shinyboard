@@ -61,7 +61,7 @@ def product_ui():
         ui.output_ui("redirect_script"),
         ui.output_ui("product_plot_widget"),
         ui.h3("par unités vendues"),
-        output_widget("display_best_sellers_by_qty"),
+        ui.output_ui("display_best_sellers_qty_ui"),
     )
 
 
@@ -69,8 +69,9 @@ def product_ui():
 def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     link: reactive.value[str] = reactive.value("http://localhost:8069/odoo/products/0")
     redirecting_script: reactive.value[str] = reactive.value("")
-
-    graph_types: reactive.value[dict[str, str]] = reactive.value()
+    graph_types: dict[str, reactive.value[str]] = {
+        "best_sellers_qty": reactive.value("bar")
+    }
 
     def get_product_product():
         return OTHER_RELS.get()["product_product"]
@@ -93,10 +94,9 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
         )
 
     @reactive.calc
-    def get_best_sellers_by_qty():
+    def get_best_sellers_qty_df():
         sale_order_line = get_sale_order_line_filtered()
-
-        infos = (
+        return (
             sale_order_line.select("name", "product_uom_qty")
             .group_by("name")
             .agg(pl.col("product_uom_qty").sum())
@@ -104,47 +104,34 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             .cast({"product_uom_qty": pl.Int32})
         )
 
-        x_data: list[str] = infos.select("name").to_series().to_list()
-        y_data: list[int] = (
-            infos.select(
-                "product_uom_qty",
-            )
-            .to_series()
-            .to_list()
-        )
+    @render_plotly
+    def get_best_sellers_qty_plotly():
+        df = get_best_sellers_qty_df()
 
-        return {"x": x_data, "y": y_data}
-
-    @render_plotly  # type: ignore
-    def display_best_sellers_by_qty():
-        graph_type = graph_types.get()["best_sellers_qty"]
-        data: dict[str, list[str]] = get_best_sellers_by_qty()
-
-        match graph_type:
+        match graph_types["best_sellers_qty"].get():
             case "bar":
-                return px.bar(x=data["x"], y=data["y"])
-            case "bubble":
-                return go.Figure(
-                    data=[
-                        go.Scatter(
-                            x=data["x"],
-                            y=data["y"],
-                            mode="markers",
-                            marker_size=[40, 60, 80, 100],
-                        )
-                    ]
-                )
+                return px.bar(data_frame=df, x="name", y="product_uom_qty")
+            case "line":
+                return px.area(data_frame=df, x="name", y="product_uom_qty")
             case _:
-                return px.bar(x=data["x"], y=data["y"])
-
-        return get_best_sellers_by_qty()
+                return px.bar(data_frame=df, x="name", y="product_uom_qty")
 
     @render.ui
-    def best_sellers_qty_graph_choice():
+    def display_best_sellers_qty_ui():
         return ui.row(
-            ui.input_action_button("best_sellers_qty_bar", ui.span("en barres")),
-            ui.input_action_button("best_sellers_qty_bubble", ui.span("en bulles")),
+            ui.input_select(
+                "graph_type_best_sellers_qty",
+                ui.span("type de graphe"),
+                ["bar", "line"],
+            ),
+            output_widget("get_best_sellers_qty_plotly"),
         )
+
+    @reactive.effect
+    @reactive.event(inputs.graph_type_best_sellers_qty)
+    def handle_best_sellers_qty_input():
+        new_type = inputs.graph_type_best_sellers_qty()
+        graph_types["best_sellers_qty"].set(new_type)
 
     def get_product_plot():
         try:

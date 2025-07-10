@@ -10,7 +10,7 @@ from datetime import datetime
 import polars as pl
 import sqlglot.expressions
 from connect import Connect
-from peewee import PostgresqlDatabase
+from peewee import SqliteDatabase
 from shiny import reactive
 
 
@@ -18,7 +18,7 @@ from shiny import reactive
 EPOCH = datetime(1970, 1, 1, 0, 0, 0)
 
 # ORM DATABASE
-QUERY_DB = PostgresqlDatabase("query_db", user="cosmos")
+DB_CONF = SqliteDatabase("odoo_shiny.db")
 
 # CREDENTIALS
 CURRENT_USER_ID = reactive.value(-1)

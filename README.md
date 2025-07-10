@@ -5,7 +5,6 @@
 ## FR
 ## Prérequis
 - une base de données Postgresql suivant le schéma Odoo 18 et les modules sales et purchase (sinon, installez [odoo]('https://github.com/odoo/odoo'))
-- une deuxième base de données Postgresql appelée 'query_db'
 
 ## Lancer l'application 🚀
 ```bash
@@ -36,7 +35,6 @@ cd shinyboard/enterprise-dashboard && shiny run app.py --launch-browser
 ## EN
 ## Requirements
 - a Postgresql Database that has an Odoo 18 Schema with sales and purchase modules (if you don't have it, install [odoo]('https://github.com/odoo/odoo'))
-- a second postgresql database called 'query_db'
 
 ## Launching the app 🚀
 ```bash

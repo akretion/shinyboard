@@ -10,14 +10,7 @@ from shiny import reactive
 from shiny import render
 from shiny import Session
 from shiny import ui
-from ..shared import (
-    AVAILABLE_RELS,
-    EPOCH,
-    SELECTED_PERIOD_HIGH_BOUND,
-    SELECTED_PERIOD_LOW_BOUND,
-    SELECTED_COMPANY_NAMES,
-    TABLE_TIME_COLUMNS,
-)
+from ..shared import pstates as ps, EPOCH
 
 
 @module.ui
@@ -30,16 +23,18 @@ def sales_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_sale_order():
         try:
-            sale_order_df = AVAILABLE_RELS.get()["sale_order"]
+            sale_order_df = ps.available_rels.get()["sale_order"]
 
-            if SELECTED_PERIOD_HIGH_BOUND.get() != EPOCH:  # to avoid errors
+            if ps.selected_period_high_bound.get() != EPOCH:  # to avoid errors
                 return GT(
                     sale_order_df.filter(
-                        pl.col(f"{TABLE_TIME_COLUMNS.get()['sale_order']}").is_between(
-                            SELECTED_PERIOD_LOW_BOUND.get(),
-                            SELECTED_PERIOD_HIGH_BOUND.get(),
+                        pl.col(
+                            f"{ps.table_time_columns.get()['sale_order']}"
+                        ).is_between(
+                            ps.selected_period_low_bound.get(),
+                            ps.selected_period_high_bound.get(),
                         ),
-                        pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+                        pl.col("company").is_in(ps.selected_company_names.get()),
                     ),
                 ).tab_header(title=md("# Les ventes"), subtitle=md("toutes confondues"))
             else:

@@ -3,12 +3,7 @@ from __future__ import annotations
 import polars as pl
 from great_tables import GT
 from great_tables import md
-from pages.shared import AVAILABLE_RELS
-from pages.shared import EPOCH
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import TABLE_TIME_COLUMNS
-from pages.shared import SELECTED_COMPANY_NAMES
+from pages.shared import pstates as ps, EPOCH
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -26,15 +21,17 @@ def to_invoice_ui():
 def to_invoice_server(inputs: Inputs, outputs: Outputs, session: Session):
     def get_to_invoice_df():
         try:
-            if SELECTED_PERIOD_HIGH_BOUND.get() != EPOCH:
+            if ps.selected_period_high_bound.get() != EPOCH:
                 return GT(
-                    AVAILABLE_RELS.get()["sale_order"].filter(
+                    ps.available_rels.get()["sale_order"].filter(
                         pl.col("invoice_status") != "no",
-                        pl.col(f"{TABLE_TIME_COLUMNS.get()['sale_order']}").is_between(
-                            SELECTED_PERIOD_LOW_BOUND.get(),
-                            SELECTED_PERIOD_HIGH_BOUND.get(),
+                        pl.col(
+                            f"{ps.table_time_columns.get()['sale_order']}"
+                        ).is_between(
+                            ps.selected_period_low_bound.get(),
+                            ps.selected_period_high_bound.get(),
                         ),
-                        pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+                        pl.col("company").is_in(ps.selected_company_names.get()),
                     ),
                 ).tab_header(title=md("# Ventes à facturer"))
 

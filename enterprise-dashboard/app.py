@@ -7,18 +7,7 @@ import pages.sales_page as sales_page
 import pages.module.sql_query_input as sql_query_input
 import pages.module.stored_queries_page as stored_queries_page
 from connect import Connect
-from pages.shared import AVAILABLE_RELS
-from pages.shared import CURRENT_USER_ID
-from pages.shared import CURRENT_USER_NAME
-from pages.shared import FRENCH_NAME
-from pages.shared import MAX_DB_TIME
-from pages.shared import MIN_DB_TIME
-from pages.shared import OTHER_RELS
-from pages.shared import SELECTED_DATAFRAME_NAME
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import TABLE_TIME_COLUMNS
-from pages.shared import SELECTED_COMPANY_NAMES
+from pages.shared import CURRENT_USER_ID, CURRENT_USER_NAME, pstates as ps
 from shiny import App
 from shiny import Inputs
 from shiny import Outputs
@@ -197,7 +186,7 @@ AND ir_model.model !~ '.show$'
             for name, value in TABLE_TIME.items():
                 new_dict.update({name: value})
 
-            TABLE_TIME_COLUMNS.set(new_dict)
+            ps.table_time_columns.set(new_dict)
 
         except Exception as EX:
             print(
@@ -274,12 +263,12 @@ AND ir_model.model !~ '.show$'
 
         res_partner = DB.read("""SELECT * FROM res_partner""")
 
-        MIN_DB_TIME.set(
+        ps.min_db_time.set(
             sale_order_joined.sql(
                 """SELECT MIN(date_order) AS min FROM self""",
             ).to_dict()["min"][0],
         )
-        MAX_DB_TIME.set(
+        ps.max_db_time.set(
             sale_order_joined.sql(
                 """SELECT MAX(date_order) + interval '1 day' AS max FROM self""",
             ).to_dict()["max"][0],
@@ -327,15 +316,14 @@ AND ir_model.model !~ '.show$'
             """
         )
 
-        OTHER_RELS.set(
+        ps.other_rels.set(
             {
                 "product_product": product_product,
                 "sale_order_line": sale_order_line,
                 "res_company": res_company,
             }
         )
-
-        AVAILABLE_RELS.set(
+        ps.available_rels.set(
             {
                 "sale_order": sale_order_joined,
                 "purchase_order": purchase_order_joined,
@@ -356,7 +344,7 @@ AND ir_model.model !~ '.show$'
     def user_filters():
         if is_logged_in.get():
             res_companies = (
-                OTHER_RELS.get()["res_company"].select("name").to_series().to_list()
+                ps.other_rels.get()["res_company"].select("name").to_series().to_list()
             )
 
             if len(res_companies) < 1:
@@ -364,9 +352,9 @@ AND ir_model.model !~ '.show$'
                     ui.input_slider(
                         "date_range",
                         ui.h4("Sélection de date"),
-                        MIN_DB_TIME.get(),
-                        MAX_DB_TIME.get(),
-                        [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                        ps.min_db_time.get(),
+                        ps.max_db_time.get(),
+                        [ps.min_db_time.get(), ps.max_db_time.get()],
                         time_format="%Y-%m-%d",
                         drag_range=True,
                     )
@@ -376,9 +364,9 @@ AND ir_model.model !~ '.show$'
                     ui.input_slider(
                         "date_range",
                         ui.h4("Sélection de date"),
-                        MIN_DB_TIME.get(),
-                        MAX_DB_TIME.get(),
-                        [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                        ps.min_db_time.get(),
+                        ps.max_db_time.get(),
+                        [ps.min_db_time.get(), ps.max_db_time.get()],
                         time_format="%Y-%m-%d",
                         drag_range=True,
                     ),
@@ -394,21 +382,21 @@ AND ir_model.model !~ '.show$'
     @reactive.effect
     @reactive.event(input.df_radio_buttons)
     def update_df_name_on_input():
-        SELECTED_DATAFRAME_NAME.set(translation[input.df_radio_buttons()])
-        FRENCH_NAME.set(input.df_radio_buttons())
+        ps.selected_dataframe_name.set(translation[input.df_radio_buttons()])
+        ps.french_name.set(input.df_radio_buttons())
 
     @reactive.effect
     @reactive.event(input.date_range)
     def date_range_handler():
         values = input.date_range()
 
-        SELECTED_PERIOD_LOW_BOUND.set(values[0])
-        SELECTED_PERIOD_HIGH_BOUND.set(values[1])
+        ps.selected_period_low_bound.set(values[0])
+        ps.selected_period_high_bound.set(values[1])
 
     @reactive.effect
     @reactive.event(input.company_name)
     def company_name_handler():
-        SELECTED_COMPANY_NAMES.set(input.company_name())
+        ps.selected_company_names.set(input.company_name())
 
 
 app = App(app_ui, app_server)

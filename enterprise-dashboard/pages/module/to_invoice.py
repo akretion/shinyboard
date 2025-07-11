@@ -36,7 +36,8 @@ def to_invoice_server(inputs: Inputs, outputs: Outputs, session: Session):
         except KeyError as KE:
             ui.notification_show(
                 ui.h4(
-                    "vous n'avez pas accès à la table des ventes, ou elle est indisponible",
+                    "vous n'avez pas accès à la table des ventes, "
+                    "ou elle est indisponible",
                 ),
             )
             print(KE)

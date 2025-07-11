@@ -10,7 +10,8 @@ from pages.shared import pstates as ps
 from shiny import Inputs, Outputs, Session, module, reactive, render, ui
 
 # TODO
-## A repository Resolver : no need to import individual repositories, just feed an instance to the resolver and it makes
+## A repository Resolver : no need to import individual repositories,
+## just feed an instance to the resolver and it makes
 ## the operation for you
 
 DB = Connect("dsn2")
@@ -129,7 +130,8 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                     else:
                         print(inspect.getmro(type(col)))
                         raise Exception(
-                            "Oops, that's not supposed to happen ! The type of column you queried isn't recognized"
+                            "Oops, that's not supposed to happen ! The type of column "
+                            "you queried isn't recognized"
                         )
 
                 @output(id=f"{differentiator.get()}")
@@ -200,7 +202,8 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                             ),
                         )
                 except KeyError:
-                    # print(f"key {state_diff}{current_diff} doesn't exist in input_states")
+                    # print(f"key {state_diff}{current_diff} doesn't exist
+                    # in input_states")
                     # print(f"input_states' keys : {input_states.get().keys()}")
                     return ui.notification_show("**sonic 2 game overr**")
 
@@ -315,7 +318,9 @@ def parse_postgres(q: str):
 
 
 def valid_postgres(q: str):
-    """checks if the query only contains projections (no Create, Update or Delete allowed)"""
+    """checks if the query only contains projections
+    (no Create, Update or Delete allowed)
+    """
     if (
         q.upper().find("UPDATE") < 0
         or q.upper().find("DELETE") < 0

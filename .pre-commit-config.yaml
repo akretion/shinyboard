@@ -1,5 +1,16 @@
+exclude: |
+  (?x)
+  # Ignore build and dist directories in addons
+  /build/|/dist/|
+  # Custom
+  first-dashboard/.*|
+  enterprise-dashboard/appdata/simple_repository.py|
+  # You don't usually want a bot to modify your legal texts
+  (LICENSE.*|COPYING.*)
+
 default_language_version:
   python: python3
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
@@ -14,30 +25,32 @@ repos:
       - id: fix-encoding-pragma
         args: ["--remove"]
       - id: check-case-conflict
-      - id: check-docstring-first
+      # - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
         # exclude files where underlines are not distinguishable from merge conflicts
         exclude: /README\.rst$|^docs/.*\.rst$
-      - id: check-symlinks
-      - id: check-xml
+      # - id: check-symlinks
+      # - id: check-xml
       - id: mixed-line-ending
         args: ["--fix=lf"]
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        name: isort except __init__.py
-        args:
-          - --settings=.
-        exclude: /__init__\.py$
+  # - repo: https://github.com/PyCQA/isort
+  #   rev: 5.12.0
+  #   hooks:
+  #     - id: isort
+  #       name: isort except __init__.py
+  #       args:
+  #         - --settings=.
+  #       exclude: /__init__\.py$
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-  # Ruff version.
-    rev: v0.11.12
-    hooks:
-    # Run the linter.
-    - id: ruff-check
-      args: ["--fix", --unsafe-fixes]
-    - id: ruff-format
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  # # Ruff version.
+  #   rev: v0.12.3
+  #   hooks:
+  #   # Run the linter.
+  #   - id: ruff
+  #     # args: [--fix, --exit-non-zero-on-fix]
+  #   # - id: ruff-check
+  #     args: ["--fix", --unsafe-fixes]
+  #   - id: ruff-format

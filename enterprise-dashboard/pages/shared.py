@@ -65,7 +65,8 @@ class PageStates:
     max_db_time: reactive.value[datetime] = reactive.value(EPOCH)
     # tables available for internal use.
     other_rels: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-    # Associates table names to their respective columns that should be used for time calculations.
+    # Associates table names to their respective columns that should be used
+    # for time calculations.
     table_time_columns: reactive.value[dict[str, str]] = reactive.value()
 
     # GLOBAL USER FILTERS
@@ -105,7 +106,9 @@ def parse_postgres(q: str):
 
 
 def valid_postgres(q: str):
-    """checks if the query only contains projections (no Create, Update or Delete allowed)"""
+    """checks if the query only contains projections
+    (no Create, Update or Delete allowed)
+    """
     if (
         q.upper().find("UPDATE") < 0
         or q.upper().find("DELETE") < 0

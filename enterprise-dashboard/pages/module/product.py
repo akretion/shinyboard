@@ -3,17 +3,10 @@ from __future__ import annotations
 import plotly.express as px
 import plotly.graph_objects as go
 import polars as pl
-from plotly.graph_objects import Figure
-from plotly.graph_objects import FigureWidget
-from shiny import Inputs
-from shiny import module
-from shiny import Outputs
-from shiny import reactive
-from shiny import render
-from shiny import Session
-from shiny import ui
-from shinywidgets import output_widget
-from shinywidgets import render_plotly
+from plotly.graph_objects import Figure, FigureWidget
+from shiny import Inputs, Outputs, Session, module, reactive, render, ui
+from shinywidgets import output_widget, render_plotly
+
 from ..shared import pstates as ps
 
 # TODO

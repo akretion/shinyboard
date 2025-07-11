@@ -1,6 +1,7 @@
 from abc import ABC
-from peewee import Model
 from typing import Type
+
+from peewee import Model
 
 
 class SimpleRepository(ABC):

@@ -1,9 +1,7 @@
-import matplotlib.pyplot as plt
 import connectorx as cx
-
-from models.shared_data_model import Shared_data_model
-
+import matplotlib.pyplot as plt
 from hr.hr_data import getHRData
+from models.shared_data_model import Shared_data_model
 
 """
 TODO

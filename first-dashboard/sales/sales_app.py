@@ -1,5 +1,5 @@
-from shiny import ui, module
 from sales.sales_persons import sales_persons_page, sales_persons_server
+from shiny import module, ui
 
 
 @module.ui

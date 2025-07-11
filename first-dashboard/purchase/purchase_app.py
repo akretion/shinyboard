@@ -1,5 +1,5 @@
-from shiny import ui, module
 from purchase.suppliers_stats import suppliers_stats_page, suppliers_stats_server
+from shiny import module, ui
 
 
 @module.ui

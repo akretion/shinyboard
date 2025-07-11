@@ -1,6 +1,5 @@
 from shiny import App, ui
 
-
 auth_ui = ui.page_fluid(
     ui.h1("Shinyboard"),
     ui.h2("Veuillez vous authentifier pour accéder à vôtre application."),

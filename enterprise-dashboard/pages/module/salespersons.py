@@ -3,15 +3,9 @@ from __future__ import annotations
 import plotly.express as px
 import polars as pl
 from great_tables import GT
-from shiny import Inputs
-from shiny import module
-from shiny import Outputs
-from shiny import reactive
-from shiny import render
-from shiny import Session
-from shiny import ui
-from shinywidgets import output_widget
-from shinywidgets import render_widget
+from shiny import Inputs, Outputs, Session, module, reactive, render, ui
+from shinywidgets import output_widget, render_widget
+
 from ..shared import pstates as ps
 
 

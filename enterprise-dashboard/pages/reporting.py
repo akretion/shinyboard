@@ -1,6 +1,5 @@
-from shiny import module, ui, Inputs, Outputs, Session
-
 from pages.module import product, salespersons
+from shiny import Inputs, Outputs, Session, module, ui
 
 
 @module.ui

@@ -1,7 +1,8 @@
-from shiny import ui, module, Inputs, Outputs, Session
+from pages import reporting
+from shiny import Inputs, Outputs, Session, module, ui
+
 from .module import sales as sales
 from .module import to_invoice as invoicing
-from pages import reporting
 
 
 @module.ui

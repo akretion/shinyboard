@@ -1,5 +1,5 @@
-from models.purchase_data_model import Purchase_data_model
 from connect import Connect
+from models.purchase_data_model import Purchase_data_model
 
 """TODO
 - Mettre 'db' dans un singleton, ou faire un Design en Factory pour empêcher lles répétition de

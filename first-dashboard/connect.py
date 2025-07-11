@@ -1,9 +1,9 @@
+import logging
 import os
+
 import connectorx as cx
 import polars as pl
-
 from dotenv import load_dotenv
-import logging
 
 print(f"ARE ENV LOADED : {load_dotenv('./.env')}")
 

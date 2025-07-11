@@ -1,15 +1,14 @@
 import polars as pl
 
-from shiny import ui, render, module, reactive
-
+# Primary tables
+from sales.sale_data import getSalesData
+from shared import getSharedData
+from shiny import module, reactive, render, ui
 
 ## TODO
 # - Affichage conditionnel pour les tables
 # - Meilleur affichage conditionnel pour les autres champs
 
-# Primary tables
-from sales.sale_data import getSalesData
-from shared import getSharedData
 
 sales_data = getSalesData()
 shared_data = getSharedData()

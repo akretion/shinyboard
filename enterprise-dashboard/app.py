@@ -190,7 +190,7 @@ AND ir_model.model !~ '.show$'
     @reactive.effect
     def set_table_times():
         conf_parser = configparser.ConfigParser()
-        conf_parser.read("dbconfig.ini")
+        conf_parser.read("config.toml")
 
         try:
             TABLE_TIME = conf_parser["TABLE_TIMES"]
@@ -208,11 +208,11 @@ AND ir_model.model !~ '.show$'
                 {EX}\n-----END OF EXCEPTION-----""",
             )
             print(
-                "The above exception is most likely due to dbconfig.ini "
+                "The above exception is most likely due to config.toml "
                 "sections or variables being invalid.",
             )
             print(
-                "Please check dbconfig.ini",
+                "Please check config.toml",
             )
 
     @reactive.effect

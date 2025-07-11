@@ -194,6 +194,8 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# odoo Shiny config
+odoo_shiny.db
 basic-app/
 basic-navigation/
 bin/
@@ -203,3 +205,5 @@ share/
 lib64/
 pyvenv.cfg
 **/__pycache__/**
+# custom local file
+perso.txt

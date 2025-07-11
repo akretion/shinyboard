@@ -1,5 +1,5 @@
 from peewee import AutoField, CharField, Model  # type: ignore[all]
-from shared import QUERY_DB
+from shared import DB_CONF
 
 
 class StoredQuery(Model):
@@ -9,5 +9,5 @@ class StoredQuery(Model):
     df_key_name = CharField()
 
     class Meta:
-        database = QUERY_DB
-        table_name = "storedquery"
+        database = DB_CONF
+        table_name = "query"

@@ -8,7 +8,7 @@ import inspect
 from appdata.stored_query_repository import StoredQueryRepository
 from appdata.stored_query_model import StoredQuery  # only for type hints
 
-from ..shared import AVAILABLE_RELS, valid_postgres, parse_postgres
+from ..shared import pstates as ps, valid_postgres, parse_postgres
 
 
 @module.ui
@@ -43,7 +43,7 @@ def stored_queries_server(input: Inputs, outputs: Outputs, session: Session):
         query_string = str(query.query)
 
         if parse_postgres(query_string) and valid_postgres(query_string):
-            df_to_use = AVAILABLE_RELS.get()[f"{query.df_key_name}"]
+            df_to_use = ps.available_rels.get()[f"{query.df_key_name}"]
             query_string = query_string.replace(f"{query.df_key_name}", "self")
 
             # Graph case

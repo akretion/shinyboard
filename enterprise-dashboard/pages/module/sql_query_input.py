@@ -7,7 +7,7 @@ import sqlglot.expressions
 import inspect  # to get sqlglot's class hierarchy
 from typing import Union
 
-from pages.shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME, FRENCH_NAME
+from pages.shared import pstates as ps
 from connect import Connect
 
 from appdata.stored_query_repository import StoredQueryRepository
@@ -49,7 +49,7 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
 
     @render.data_frame
     def selected_df():
-        base_df = AVAILABLE_RELS.get()[SELECTED_DATAFRAME_NAME.get()]
+        base_df = ps.available_rels.get()[ps.selected_dataframe_name.get()]
 
         dotted_row = pl.DataFrame(
             [[None for _ in base_df.columns]], schema=base_df.schema
@@ -67,7 +67,9 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
     @reactive.event(input.exec)
     def query_handler():
         if parse_postgres(input.query()) and valid_postgres(input.query()):
-            CURRENT_DATAFRAME = AVAILABLE_RELS.get()[f"{SELECTED_DATAFRAME_NAME.get()}"]
+            CURRENT_DATAFRAME = ps.available_rels.get()[
+                f"{ps.selected_dataframe_name.get()}"
+            ]
 
         if (
             input.query().replace("my_table", "test") == input.query()
@@ -85,12 +87,16 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
             query_with_self: str = input.query().replace("my_table", "self")
 
             query_with_df_name: str = (
-                input.query().replace("my_table", f"{SELECTED_DATAFRAME_NAME.get()}")
-                if input.query().replace("my_table", f"{SELECTED_DATAFRAME_NAME.get()}")
-                is not input.query().replace(
-                    "my_table", f"{SELECTED_DATAFRAME_NAME.get()}"
+                input.query().replace("my_table", f"{ps.selected_dataframe_name.get()}")
+                if input.query().replace(
+                    "my_table", f"{ps.selected_dataframe_name.get()}"
                 )
-                else input.query().replace("self", f"{SELECTED_DATAFRAME_NAME.get()}")
+                is not input.query().replace(
+                    "my_table", f"{ps.selected_dataframe_name.get()}"
+                )
+                else input.query().replace(
+                    "self", f"{ps.selected_dataframe_name.get()}"
+                )
             )
 
             title_to_store: reactive.value[str] = reactive.value(query_with_df_name)
@@ -224,7 +230,7 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                 STORED_QUERY_REPO.create(
                     display_title=title_to_store.get(),
                     query=query_with_df_name,
-                    df_key_name=SELECTED_DATAFRAME_NAME.get(),
+                    df_key_name=ps.selected_dataframe_name.get(),
                 )
 
                 ui.notification_show(ui.h3("Requête sauvegardée."), type="message")
@@ -261,11 +267,11 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
 
     @render.text
     def df_name():
-        return f"{FRENCH_NAME.get()}"
+        return f"{ps.french_name.get()}"
 
     @render.ui
     def df_preview_title():
-        return ui.h4(f"Aperçu de {FRENCH_NAME.get()}")
+        return ui.h4(f"Aperçu de {ps.french_name.get()}")
 
     @render.ui
     def get_tips():
@@ -275,7 +281,7 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
             - sélectionnez une table **dans la barre latérale**.
             - Vos requêtes seront exécutées sur la **table sélectionnée**.
             - Remplacez le nom de la table par **'my_table'** dans vos requêtes.
-            - Utilisez les noms de colonnes dans l'aperçu de **{FRENCH_NAME.get()}**
+            - Utilisez les noms de colonnes dans l'aperçu de **{ps.french_name.get()}**
             """
         )
 

@@ -14,14 +14,7 @@ from shiny import Session
 from shiny import ui
 from shinywidgets import output_widget
 from shinywidgets import render_plotly
-from ..shared import (
-    AVAILABLE_RELS,
-    OTHER_RELS,
-    SELECTED_PERIOD_HIGH_BOUND,
-    SELECTED_PERIOD_LOW_BOUND,
-    SELECTED_COMPANY_NAMES,
-    TABLE_TIME_COLUMNS,
-)
+from ..shared import pstates as ps
 
 # TODO
 # Donner un choix de graphe aux utilisateurs
@@ -76,22 +69,22 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     }
 
     def get_product_product():
-        return OTHER_RELS.get()["product_product"]
+        return ps.other_rels.get()["product_product"]
 
     @reactive.calc
     def get_sale_order_line_filtered():
         return (
-            OTHER_RELS.get()["sale_order_line"]
+            ps.other_rels.get()["sale_order_line"]
             .join_where(
-                AVAILABLE_RELS.get()["sale_order"],
+                ps.available_rels.get()["sale_order"],
                 pl.col("order_id") == pl.col("id_right"),
             )
             .filter(
-                pl.col(f"{TABLE_TIME_COLUMNS.get()['sale_order']}").is_between(
-                    SELECTED_PERIOD_LOW_BOUND.get(),
-                    SELECTED_PERIOD_HIGH_BOUND.get(),
+                pl.col(f"{ps.table_time_columns.get()['sale_order']}").is_between(
+                    ps.selected_period_low_bound.get(),
+                    ps.selected_period_high_bound.get(),
                 ),
-                pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+                pl.col("company").is_in(ps.selected_company_names.get()),
             )
         )
 

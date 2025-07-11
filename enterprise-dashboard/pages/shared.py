@@ -4,6 +4,7 @@ should be shared across files.
 """
 
 from __future__ import annotations
+from dataclasses import dataclass
 
 from datetime import datetime
 
@@ -50,40 +51,35 @@ def available_tables(uid: int, connection: Connect):
     print(table_name_schema_dict)
 
 
-# DATAFRAME DATA
+@dataclass
+class PageStates:
+    # DATAFRAME DATA
+    # tables available to the user.
+    available_rels: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+    # Holds the canonical, in DB name of the currently selected table.
+    selected_dataframe_name: reactive.value[str] = reactive.value("")
+    # Holds the french name of the currently selected table.
+    french_name: reactive.value[str] = reactive.value("")
+    # Minimum time found in database.
+    min_db_time: reactive.value[datetime] = reactive.value(EPOCH)
+    # Maximum time found in database.
+    max_db_time: reactive.value[datetime] = reactive.value(EPOCH)
+    # tables available for internal use.
+    other_rels: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+    # Associates table names to their respective columns that should be used for time calculations.
+    table_time_columns: reactive.value[dict[str, str]] = reactive.value()
 
-AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-# tables available to the user.
+    # GLOBAL USER FILTERS
 
-SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
-# Holds the canonical, in DB name of the currently selected table.
-
-FRENCH_NAME: reactive.value[str] = reactive.value("")
-# Holds the french name of the currently selected table.
-
-MIN_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
-# Minimum time found in database.
-
-MAX_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
-# Maximum time found in database.
-
-OTHER_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-# tables available for internal use.
-
-TABLE_TIME_COLUMNS: reactive.value[dict[str, str]] = reactive.value()
-# Associates table names to their respective columns that should be used for time calculations.
+    # The rightmost value of the date_range.
+    selected_period_high_bound: reactive.value[datetime] = reactive.value(EPOCH)
+    # The leftmost value of the data_range.
+    selected_period_low_bound: reactive.value[datetime] = reactive.value(EPOCH)
+    # The selected value of the company selection dropdown
+    selected_company_names: reactive.value[list[str]] = reactive.value([""])
 
 
-# GLOBAL USER FILTERS
-
-SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
-# The rightmost value of the date_range.
-
-SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
-# The leftmost value of the data_range.
-
-SELECTED_COMPANY_NAMES: reactive.value[list[str]] = reactive.value([""])
-# The selected value of the company selection dropdown
+pstates: PageStates = PageStates()
 
 
 # UTILS

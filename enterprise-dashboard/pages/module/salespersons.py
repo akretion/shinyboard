@@ -12,14 +12,7 @@ from shiny import Session
 from shiny import ui
 from shinywidgets import output_widget
 from shinywidgets import render_widget
-from ..shared import (
-    AVAILABLE_RELS,
-    OTHER_RELS,
-    SELECTED_PERIOD_HIGH_BOUND,
-    SELECTED_PERIOD_LOW_BOUND,
-    SELECTED_COMPANY_NAMES,
-    TABLE_TIME_COLUMNS,
-)
+from ..shared import pstates as ps
 
 
 @module.ui
@@ -50,21 +43,21 @@ def salespersons_ui():
 def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_sale_order_filtered():
-        return AVAILABLE_RELS.get()["sale_order"].filter(
-            pl.col(TABLE_TIME_COLUMNS.get()["sale_order"]).is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(),
-                SELECTED_PERIOD_HIGH_BOUND.get(),
+        return ps.available_rels.get()["sale_order"].filter(
+            pl.col(ps.table_time_columns.get()["sale_order"]).is_between(
+                ps.selected_period_low_bound.get(),
+                ps.selected_period_high_bound.get(),
             ),
-            pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+            pl.col("company").is_in(ps.selected_company_names.get()),
         )
 
     def get_sale_order_line_filtered():
-        return OTHER_RELS.get()["sale_order_line"].filter(
+        return ps.other_rels.get()["sale_order_line"].filter(
             pl.col("create_date").is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(),
-                SELECTED_PERIOD_HIGH_BOUND.get(),
+                ps.selected_period_low_bound.get(),
+                ps.selected_period_high_bound.get(),
             ),
-            pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+            pl.col("company").is_in(ps.selected_company_names.get()),
         )
 
     def get_salespersons_plot():
@@ -128,7 +121,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
 
     @render.text
     def display_sales_plot_text():
-        return f"Ventes (du {SELECTED_PERIOD_LOW_BOUND.get()} au {SELECTED_PERIOD_HIGH_BOUND.get()})"
+        return f"Ventes (du {ps.selected_period_low_bound.get()} au {ps.selected_period_high_bound.get()})"
 
     @reactive.calc
     def get_client_df():

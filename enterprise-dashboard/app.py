@@ -6,7 +6,7 @@ import polars as pl
 import pages.sales_page as sales_page
 import pages.module.sql_query_input as sql_query_input
 import pages.module.stored_queries_page as stored_queries_page
-from pages.connect import Connect
+from connect import Connect
 from pages.shared import AVAILABLE_RELS
 from pages.shared import CURRENT_USER_ID
 from pages.shared import CURRENT_USER_NAME

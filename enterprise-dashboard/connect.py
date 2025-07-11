@@ -6,10 +6,12 @@
 import os
 import connectorx as cx
 import polars as pl
+from dotenv import load_dotenv
 
 import logging
 
 logger = logging.getLogger(__name__)
+load_dotenv()
 
 
 class Connect:
@@ -31,6 +33,7 @@ class Connect:
     def _get_data_sources(self):
         dsns = os.getenv("SHINYDSN")
         if not dsns:
+            print(f"dsns : {dsns}")
             raise Exception("No DSN environment variable found.")
 
         print(f"DSNS : {dsns}")

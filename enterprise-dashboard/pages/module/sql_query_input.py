@@ -8,7 +8,7 @@ import inspect  # to get sqlglot's class hierarchy
 from typing import Union
 
 from pages.shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME, FRENCH_NAME
-from pages.connect import Connect
+from connect import Connect
 
 from appdata.stored_query_repository import StoredQueryRepository
 

@@ -1,13 +1,14 @@
 from shiny import module, ui, Inputs, Outputs, Session, render
 
-
-from pages.shared import AVAILABLE_RELS, valid_postgres, parse_postgres
-
 import sqlglot.expressions
 import inspect
 
+# TODO import appdata as a relative import by move all code to src/ dir
+# test/ must at the same level than src/
 from appdata.stored_query_repository import StoredQueryRepository
 from appdata.stored_query_model import StoredQuery  # only for type hints
+
+from ..shared import AVAILABLE_RELS, valid_postgres, parse_postgres
 
 
 @module.ui

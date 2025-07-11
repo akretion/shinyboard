@@ -3,12 +3,6 @@ from __future__ import annotations
 import plotly.express as px
 import polars as pl
 from great_tables import GT
-from pages.shared import AVAILABLE_RELS
-from pages.shared import OTHER_RELS
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import TABLE_TIME_COLUMNS
-from pages.shared import SELECTED_COMPANY_NAMES
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -18,6 +12,14 @@ from shiny import Session
 from shiny import ui
 from shinywidgets import output_widget
 from shinywidgets import render_widget
+from ..shared import (
+    AVAILABLE_RELS,
+    OTHER_RELS,
+    SELECTED_PERIOD_HIGH_BOUND,
+    SELECTED_PERIOD_LOW_BOUND,
+    SELECTED_COMPANY_NAMES,
+    TABLE_TIME_COLUMNS,
+)
 
 
 @module.ui

@@ -5,12 +5,6 @@ import plotly.graph_objects as go
 import polars as pl
 from plotly.graph_objects import Figure
 from plotly.graph_objects import FigureWidget
-from pages.shared import AVAILABLE_RELS
-from pages.shared import OTHER_RELS
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import SELECTED_COMPANY_NAMES
-from pages.shared import TABLE_TIME_COLUMNS
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -20,6 +14,14 @@ from shiny import Session
 from shiny import ui
 from shinywidgets import output_widget
 from shinywidgets import render_plotly
+from ..shared import (
+    AVAILABLE_RELS,
+    OTHER_RELS,
+    SELECTED_PERIOD_HIGH_BOUND,
+    SELECTED_PERIOD_LOW_BOUND,
+    SELECTED_COMPANY_NAMES,
+    TABLE_TIME_COLUMNS,
+)
 
 # TODO
 # Donner un choix de graphe aux utilisateurs

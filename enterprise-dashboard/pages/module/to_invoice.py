@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import polars as pl
 from great_tables import GT, md
-from pages.shared import EPOCH
-from pages.shared import pstates as ps
+from pages.shared import EPOCH, pstates as ps
 from shiny import Inputs, Outputs, Session, module, render, ui
 
 

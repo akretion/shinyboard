@@ -4,8 +4,7 @@ import polars as pl
 from great_tables import GT, md
 from shiny import Inputs, Outputs, Session, module, reactive, render, ui
 
-from ..shared import EPOCH
-from ..shared import pstates as ps
+from ..shared import EPOCH, pstates as ps
 
 
 @module.ui

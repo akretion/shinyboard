@@ -8,8 +8,7 @@ import pages.sales_page as sales_page
 import polars as pl
 from connect import Connect
 from pages.main import _
-from pages.shared import CURRENT_USER_ID, CURRENT_USER_NAME
-from pages.shared import pstates as ps
+from pages.shared import CURRENT_USER_ID, CURRENT_USER_NAME, pstates as ps
 from shiny import App, Inputs, Outputs, Session, reactive, render, ui
 
 app_ui = ui.page_sidebar(

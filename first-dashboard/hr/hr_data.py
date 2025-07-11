@@ -1,7 +1,6 @@
 import polars as pl
-
-from models.hr_data_model import Hr_data_model
 from connect import Connect
+from models.hr_data_model import Hr_data_model
 
 """TODO
 - Mettre 'db' dans un singleton, ou faire un Design en Factory pour empêcher lles répétition de

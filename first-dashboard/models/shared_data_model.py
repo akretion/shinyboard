@@ -1,5 +1,6 @@
-import polars as pl
 from datetime import datetime
+
+import polars as pl
 
 
 class Shared_data_model:

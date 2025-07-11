@@ -1,16 +1,13 @@
-from shiny import ui, render, reactive
-from shiny import module, Inputs, Outputs, Session
+import inspect  # to get sqlglot's class hierarchy
+from typing import Union
 
 import matplotlib.pyplot as plt
 import polars as pl
 import sqlglot.expressions
-import inspect  # to get sqlglot's class hierarchy
-from typing import Union
-
-from pages.shared import pstates as ps
-from connect import Connect
-
 from appdata.stored_query_repository import StoredQueryRepository
+from connect import Connect
+from pages.shared import pstates as ps
+from shiny import Inputs, Outputs, Session, module, reactive, render, ui
 
 # TODO
 ## A repository Resolver : no need to import individual repositories, just feed an instance to the resolver and it makes

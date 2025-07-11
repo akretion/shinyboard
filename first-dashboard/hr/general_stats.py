@@ -1,8 +1,8 @@
-from shiny import ui, render, module
 import polars as pl
 
 # Data import
 from hr.hr_data import getHRData
+from shiny import module, render, ui
 
 
 @module.ui

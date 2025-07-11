@@ -1,20 +1,16 @@
 from __future__ import annotations
-from pages.main import _
+
 import configparser
 
-import polars as pl
-import pages.sales_page as sales_page
 import pages.module.sql_query_input as sql_query_input
 import pages.module.stored_queries_page as stored_queries_page
+import pages.sales_page as sales_page
+import polars as pl
 from connect import Connect
-from pages.shared import CURRENT_USER_ID, CURRENT_USER_NAME, pstates as ps
-from shiny import App
-from shiny import Inputs
-from shiny import Outputs
-from shiny import reactive
-from shiny import render
-from shiny import Session
-from shiny import ui
+from pages.main import _
+from pages.shared import CURRENT_USER_ID, CURRENT_USER_NAME
+from pages.shared import pstates as ps
+from shiny import App, Inputs, Outputs, Session, reactive, render, ui
 
 app_ui = ui.page_sidebar(
     ui.sidebar(

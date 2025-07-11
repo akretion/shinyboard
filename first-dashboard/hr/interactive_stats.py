@@ -1,10 +1,7 @@
 import polars as pl
-
-from shiny import ui, reactive, render, module
-
 from hr.hr_data import getHRData
 from shared import placeholder_plot
-
+from shiny import module, reactive, render, ui
 
 hr_data = getHRData()
 

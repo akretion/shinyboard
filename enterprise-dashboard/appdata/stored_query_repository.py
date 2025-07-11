@@ -1,6 +1,7 @@
-from .stored_query_model import StoredQuery
-from .simple_repository import SimpleRepository
 from pages.shared import DB_CONF
+
+from .simple_repository import SimpleRepository
+from .stored_query_model import StoredQuery
 
 
 class StoredQueryRepository(SimpleRepository):

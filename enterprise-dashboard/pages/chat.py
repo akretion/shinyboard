@@ -1,7 +1,6 @@
-from shiny import ui, module, render, reactive
-from shiny import Inputs, Outputs, Session
-from connect import Connect
 import polars as pl
+from connect import Connect
+from shiny import Inputs, Outputs, Session, module, reactive, render, ui
 from vanna.remote import VannaDefault
 
 # TODO

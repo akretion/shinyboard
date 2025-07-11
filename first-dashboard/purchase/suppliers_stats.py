@@ -1,9 +1,9 @@
-from shiny import ui, render, module
-from purchase.purchase_data import getPurchaseData
-from shared import getSharedData
 from datetime import datetime
 
 import polars as pl
+from purchase.purchase_data import getPurchaseData
+from shared import getSharedData
+from shiny import module, render, ui
 
 # TODO
 ## Rendre l'affichage du temps de retard plus beau

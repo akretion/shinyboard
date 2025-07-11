@@ -4,8 +4,8 @@ should be shared across files.
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
 
+from dataclasses import dataclass
 from datetime import datetime
 
 import polars as pl
@@ -13,7 +13,6 @@ import sqlglot.expressions
 from connect import Connect
 from peewee import SqliteDatabase
 from shiny import reactive
-
 
 # CONSTANTS
 EPOCH = datetime(1970, 1, 1, 0, 0, 0)

@@ -1,16 +1,11 @@
 from __future__ import annotations
 
 import polars as pl
-from great_tables import GT
-from great_tables import md
-from shiny import Inputs
-from shiny import module
-from shiny import Outputs
-from shiny import reactive
-from shiny import render
-from shiny import Session
-from shiny import ui
-from ..shared import pstates as ps, EPOCH
+from great_tables import GT, md
+from shiny import Inputs, Outputs, Session, module, reactive, render, ui
+
+from ..shared import EPOCH
+from ..shared import pstates as ps
 
 
 @module.ui

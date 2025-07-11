@@ -2,15 +2,14 @@
 # import pyarrow as PyA
 from pathlib import Path
 
-from shiny import App, ui, reactive
+from auth import auth_app
 
 # Pages
 from hr import hr_app
-from sales import sales_app
 from purchase import purchase_app
+from sales import sales_app
 from shared import getSharedData
-
-from auth import auth_app
+from shiny import App, reactive, ui
 
 # for routing between two shiny apps (or another starlette app)
 from starlette.applications import Starlette

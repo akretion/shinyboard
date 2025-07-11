@@ -115,7 +115,10 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
 
     @render.text
     def display_sales_plot_text():
-        return f"Ventes (du {ps.selected_period_low_bound.get()} au {ps.selected_period_high_bound.get()})"
+        return (
+            f"Ventes (du {ps.selected_period_low_bound.get()} au "
+            f"{ps.selected_period_high_bound.get()})"
+        )
 
     @reactive.calc
     def get_client_df():

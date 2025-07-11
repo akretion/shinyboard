@@ -197,7 +197,9 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
 
         except KeyError as KE:
             print(
-                f"as KeyError has occurred, it most likely means the table you're trying to access isn't available.\n------EXCEPTIONc\n{KE}\n------ENF OF EXCEPTION------",
+                f"as KeyError has occurred, it most likely means the table you're "
+                f"trying to access isn't available.\n------EXCEPTIONc\n{KE}\n"
+                "------ENF OF EXCEPTION------",
             )
 
         except Exception as EX:
@@ -226,18 +228,22 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             )
 
             link.set(f"http://localhost:8069/odoo/products/{my_id[0]}")
-            redirecting_script.set(f"""
+            redirecting_script.set(
+                f"""
             window.open('{link.get()}', '_blank')
-            """)
+            """
+            )
 
         else:
             print("this looks like a service, not a product...")
 
     @render.ui
     def redirect_script():
-        return ui.tags.script(f"""
+        return ui.tags.script(
+            f"""
         {redirecting_script.get()}
-        """)
+        """
+        )
 
     @reactive.calc
     def get_trending_category_units_sold():

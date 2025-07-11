@@ -2,7 +2,6 @@ import inspect
 
 import sqlglot.expressions
 from appdata.stored_query_model import StoredQuery  # only for type hints
-
 # TODO import appdata as a relative import by move all code to src/ dir
 # test/ must at the same level than src/
 from appdata.stored_query_repository import StoredQueryRepository
@@ -72,5 +71,6 @@ def stored_queries_server(input: Inputs, outputs: Outputs, session: Session):
                     else:
                         print(inspect.getmro(type(col)))
                         raise Exception(
-                            "Oops, that's not supposed to happen ! The type of column you queried isn't recognized"
+                            "Oops, that's not supposed to happen ! The type of column "
+                            "you queried isn't recognized"
                         )

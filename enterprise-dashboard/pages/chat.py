@@ -23,12 +23,14 @@ dataframes: dict[str, pl.DataFrame] = {
 def train_vanna():
     for key in dataframes.keys():
         vn.train(
-            documentation=f"the table {key} has the following schema : {dataframes[key].schema}"
+            documentation=f"the table {key} has the following schema : "
+            f"{dataframes[key].schema}"
         )
         print(f"training for {key} done")
 
     vn.train(
-        documentation="sale_order.state can take these values : 'draft', 'sent', 'sale', 'done', 'cancel'"
+        documentation="sale_order.state can take these values : 'draft', 'sent', "
+        "'sale', 'done', 'cancel'"
     )
 
 

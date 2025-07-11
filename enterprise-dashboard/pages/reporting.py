@@ -1,6 +1,6 @@
 from shiny import module, ui, Inputs, Outputs, Session
 
-from sales_module.report_module import product, salespersons
+from pages.module import product, salespersons
 
 
 @module.ui

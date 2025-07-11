@@ -7,9 +7,10 @@ import sqlglot.expressions
 import inspect  # to get sqlglot's class hierarchy
 from typing import Union
 
-from shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME, FRENCH_NAME
-from connect import Connect
-from repositories.stored_query_repository import StoredQueryRepository
+from pages.shared import AVAILABLE_RELS, SELECTED_DATAFRAME_NAME, FRENCH_NAME
+from pages.connect import Connect
+
+from appdata.stored_query_repository import StoredQueryRepository
 
 # TODO
 ## A repository Resolver : no need to import individual repositories, just feed an instance to the resolver and it makes
@@ -26,7 +27,7 @@ def sql_query_input():
         ui.output_ui("df_preview_title"),
         ui.output_data_frame("selected_df"),
         ui.hr(),
-        ui.input_text_area("query", ui.h3("Entre vôtre requête SQL")),
+        ui.input_text_area("query", ui.h3("Entrez vôtre requête SQL")),
         ui.output_ui("get_tips"),
         ui.input_action_button("exec", "lancer"),
         ui.output_ui("query_res_display"),
@@ -35,7 +36,6 @@ def sql_query_input():
 
 @module.server
 def sql_query_server(input: Inputs, output: Outputs, session: Session):
-    # in deprecation...
     differentiator: reactive.value[int] = reactive.value(0)
     title_diff = "title_"
     state_diff = "state_"

@@ -5,12 +5,12 @@ import plotly.graph_objects as go
 import polars as pl
 from plotly.graph_objects import Figure
 from plotly.graph_objects import FigureWidget
-from shared import AVAILABLE_RELS
-from shared import OTHER_RELS
-from shared import SELECTED_PERIOD_HIGH_BOUND
-from shared import SELECTED_PERIOD_LOW_BOUND
-from shared import SELECTED_COMPANY_NAMES
-from shared import TABLE_TIME_COLUMNS
+from pages.shared import AVAILABLE_RELS
+from pages.shared import OTHER_RELS
+from pages.shared import SELECTED_PERIOD_HIGH_BOUND
+from pages.shared import SELECTED_PERIOD_LOW_BOUND
+from pages.shared import SELECTED_COMPANY_NAMES
+from pages.shared import TABLE_TIME_COLUMNS
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -93,6 +93,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             )
         )
 
+    # Best sellers by units sold
     @reactive.calc
     def get_best_sellers_qty_df():
         sale_order_line = get_sale_order_line_filtered()
@@ -133,6 +134,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
         new_type = inputs.graph_type_best_sellers_qty()
         graph_types["best_sellers_qty"].set(new_type)
 
+    # Product Pie by revenue
     def get_product_plot():
         try:
             sale_order_line = get_sale_order_line_filtered()
@@ -186,7 +188,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
                 legend=dict(
                     x=1,
                     y=0,
-                    traceorder="reversed",
+                    traceorder="normal",
                     title_font_family=None,
                     font=dict(
                         family=None,

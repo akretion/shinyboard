@@ -1,11 +1,13 @@
 from shiny import module, ui, Inputs, Outputs, Session, render
 
-from repositories.stored_query_repository import StoredQueryRepository
-from models.stored_query_model import StoredQuery  # for type hints
-from shared import AVAILABLE_RELS, valid_postgres, parse_postgres
+
+from pages.shared import AVAILABLE_RELS, valid_postgres, parse_postgres
 
 import sqlglot.expressions
 import inspect
+
+from appdata.stored_query_repository import StoredQueryRepository
+from appdata.stored_query_model import StoredQuery  # only for type hints
 
 
 @module.ui

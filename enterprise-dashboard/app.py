@@ -1,25 +1,24 @@
 from __future__ import annotations
-from main import _
+from pages.main import _
 import configparser
 
 import polars as pl
-import sales_module.module
-import sales_module.sales
-import sql_query_input
-import stored_queries_page
-from connect import Connect
-from shared import AVAILABLE_RELS
-from shared import CURRENT_USER_ID
-from shared import CURRENT_USER_NAME
-from shared import FRENCH_NAME
-from shared import MAX_DB_TIME
-from shared import MIN_DB_TIME
-from shared import OTHER_RELS
-from shared import SELECTED_DATAFRAME_NAME
-from shared import SELECTED_PERIOD_HIGH_BOUND
-from shared import SELECTED_PERIOD_LOW_BOUND
-from shared import TABLE_TIME_COLUMNS
-from shared import SELECTED_COMPANY_NAMES
+import pages.sales_page as sales_page
+import pages.module.sql_query_input as sql_query_input
+import pages.module.stored_queries_page as stored_queries_page
+from pages.connect import Connect
+from pages.shared import AVAILABLE_RELS
+from pages.shared import CURRENT_USER_ID
+from pages.shared import CURRENT_USER_NAME
+from pages.shared import FRENCH_NAME
+from pages.shared import MAX_DB_TIME
+from pages.shared import MIN_DB_TIME
+from pages.shared import OTHER_RELS
+from pages.shared import SELECTED_DATAFRAME_NAME
+from pages.shared import SELECTED_PERIOD_HIGH_BOUND
+from pages.shared import SELECTED_PERIOD_LOW_BOUND
+from pages.shared import TABLE_TIME_COLUMNS
+from pages.shared import SELECTED_COMPANY_NAMES
 from shiny import App
 from shiny import Inputs
 from shiny import Outputs
@@ -27,7 +26,6 @@ from shiny import reactive
 from shiny import render
 from shiny import Session
 from shiny import ui
-
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
@@ -156,12 +154,12 @@ AND ir_model.model !~ '.show$'
             return ui.page_navbar(
                 ui.nav_panel(
                     ui.h2("Sales"),
-                    sales_module.module.module_ui("sales_mod"),
-                    sales_module.module.module_server("sales_mod"),
+                    sales_page.module_ui("sales_mod"),
+                    sales_page.module_server("sales_mod"),
                 ),
                 ui.nav_panel(
                     ui.h2(_("Generate charts")),
-                    ui.h1(_("You're logged with {} !").format(in_logins.get()['user'])),
+                    ui.h1(_("You're logged with {} !").format(in_logins.get()["user"])),
                     ui.span(
                         _("Enter SQL queries to generate visual indicators"),
                     ),

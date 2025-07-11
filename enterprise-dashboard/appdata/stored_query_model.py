@@ -1,5 +1,5 @@
 from peewee import AutoField, CharField, Model  # type: ignore[all]
-from shared import DB_CONF
+from pages.shared import DB_CONF
 
 
 class StoredQuery(Model):

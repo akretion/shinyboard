@@ -9,7 +9,7 @@ from datetime import datetime
 
 import polars as pl
 import sqlglot.expressions
-from connect import Connect
+from pages.connect import Connect
 from peewee import SqliteDatabase
 from shiny import reactive
 

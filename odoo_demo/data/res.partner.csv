@@ -1,0 +1,23 @@
+id,name,country_id:id,street,zip,city,phone,email
+res_partner_dih,Alain DIH,base.fr,10 rue de la manche,59001,Béthune,06.78.71.96.64,alain.dih@hotmail.com
+res_partner_diss,Amar DISSOIR,base.fr,41 bd Saint Jacques,75014,Paris,06.78.71.96.76,amar.dissoir@free.fr
+res_partner_voj,Andy VOJHANBON,base.fr,150 avenue des champs élysées,75008,Paris,06.78.71.96.70,andy.vojanbhon@free.fr
+res_partner_honnete,Camille HONNETE,base.fr,16 r Letort,75018,Paris,06.78.71.96.80,camille.honnete@free.fr
+res_partner_honxa,Cécile HONXA,base.fr,15 rue du basket,87100,Limoges,06.78.71.96.66,cecile.honxa@laposte.net
+res_partner_bi,César BI,base.fr,39 av Champs Elysées,75008,Paris,06.78.71.96.74,cesar.bi@free.fr
+res_partner_dubol,Ella DUBOL,base.fr,25 r Oscar Roty,75015,Paris,06.78.71.96.86,ella.dubol@free.fr
+res_partner_debord,Elvire DEBORD,base.fr,3 r Dancourt,75018,Paris,06.78.71.96.72,elvire.debord@free.fr
+res_partner_vencouran,Harry VENCOURAN,base.fr,148 av Félix Faure,75015,Paris,06.78.71.96.90,harry.vencouran@free.fr
+res_partner_aze,Hélène AZE,base.fr,270 r Fbg Saint Antoine,75012,Paris,06.78.71.96.82,helene.aze@free.fr
+res_partner_nhastic0,Jim NHASTIC,base.fr,150 rue Vauban,69001,Lyon,06.78.71.96.60,jim.nhastic@google.fr
+res_partner_ajum,Karl AJUMIDE,base.fr,25 r Caumartin,75009,Paris,06.78.71.96.84,karl.ajumide@free.fr
+res_partner_cley,Lara CLEYTE,base.fr,15 avenue de France,74001,Annecy,06.78.71.96.68,lara.cleyte@yahoo.fr
+res_partner_camet0,Léon CAMET,base.mq,3 rue d'à côté,97200,Fort de France,06.78.71.96.58,leon.camet@gmail.com
+res_partner_pancuir,Leslie PANCUIR,base.fr,13 r Odessa,75014,Paris,06.78.71.96.78,leslie.pancuir@free.fr
+res_partner_stou,Marie STOURNE,base.fr,9 r Vauvilliers,75001,Paris,06.78.71.96.94,marie.stourne@free.fr
+res_partner_austin0,Mini AUSTIN,base.au,6 perth avenue Yarralula,2000,Sydney,06 73 12 11 11,mini@bmw.com
+res_partner_hamploye0,Paul HAMPLOYE,base.fr,13 rue de l'impasse,13001,Marseille,06.78.71.96.62,paul.hamploye@orange.fr
+res_partner_bif,Rose BIF,base.fr,78 Bis av Marceau,75008,Paris,06.78.71.96.96,rose.bif@free.fr
+res_partner_anht0,Serge ANHT,base.gp,rue de l'avenir,97110,Pointe-à-Pitre,06 87 22 72 82,anht@muette.fr
+res_partner_mq_stou,Marie STOURHNE,base.mq,rue germain,97212,Saint Joseph,06.78.71.96.94,marie.stourne@free.fr
+res_partner_gp_ahjum,Karl AHJUMIDE,base.gp,7 r de Berri,97120,Saint Claude,06.78.71.96.84,karl.ajumide@free.fr

@@ -65,7 +65,6 @@ def stored_queries_server(input: Inputs, outputs: Outputs, session: Session):
                         y_data = (
                             df_to_use.select(f"{agg_col_name}").to_series().to_list()
                         )
-
                         # should never happen
                     else:
                         print(inspect.getmro(type(col)))

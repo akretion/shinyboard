@@ -221,17 +221,12 @@ AND ir_model.model !~ '.show$'
             sale_order.require_payment,
             sale_order.require_signature,
             sale_order.id AS id
-
         FROM sale_order
-
-        JOIN res_partner AS order_partner
-        ON sale_order.partner_id = order_partner.id
-
-        JOIN res_partner AS order_user
-        ON sale_order.user_id = order_user.user_id
-
-        JOIN res_company AS order_company
-        ON sale_order.company_id = order_company.id
+          LEFT JOIN res_partner AS order_partner
+            ON sale_order.partner_id = order_partner.id
+          LEFT JOIN res_partner AS order_user ON sale_order.user_id = order_user.user_id
+          LEFT JOIN res_company AS order_company
+            ON sale_order.company_id = order_company.id
         """
         )
 
@@ -245,19 +240,14 @@ AND ir_model.model !~ '.show$'
             purchase_order.user_id AS purchase_order_user_id,
             purchase_order.write_uid AS purchase_order_write_uid,
             purchase_order.write_date AS purchase_order_write_date
-
         FROM purchase_order
-
-        JOIN res_partner
-        ON purchase_order.partner_id = res_partner.id
-
-        JOIN res_company AS purchase_company
-        ON purchase_order.company_id = purchase_company.id
+            LEFT JOIN res_partner
+                ON purchase_order.partner_id = res_partner.id
+            LEFT JOIN res_company AS purchase_company
+                ON purchase_order.company_id = purchase_company.id
         """,
         )
-
         res_company = DB.read("""SELECT * FROM res_company""")
-
         res_partner = DB.read("""SELECT * FROM res_partner""")
 
         ps.min_db_time.set(
@@ -284,23 +274,17 @@ AND ir_model.model !~ '.show$'
                 price_unit,
                 price_total,
                 sol.create_date::date
-
             FROM sale_order_line sol
-
-            JOIN res_partner
-            ON res_partner.id = sol.order_partner_id
-
-            JOIN product_product
-            ON sol.product_id = product_product.id
-
-            JOIN product_template
-            ON product_product.product_tmpl_id = product_template.id
-
-            JOIN product_category
-            ON product_template.categ_id = product_category.id
-
-            JOIN res_company AS order_line_company
-            ON sol.company_id = order_line_company.id
+                JOIN res_partner
+                    ON res_partner.id = sol.order_partner_id
+                JOIN product_product
+                    ON sol.product_id = product_product.id
+                JOIN product_template
+                    ON product_product.product_tmpl_id = product_template.id
+                JOIN product_category
+                    ON product_template.categ_id = product_category.id
+                JOIN res_company AS order_line_company
+                    ON sol.company_id = order_line_company.id
             """,
         )
 
@@ -360,7 +344,7 @@ AND ir_model.model !~ '.show$'
                 return ui.span(
                     ui.input_slider(
                         "date_range",
-                        ui.h4("Sélection de date"),
+                        ui.h4(_("Date range")),
                         ps.min_db_time.get(),
                         ps.max_db_time.get(),
                         [ps.min_db_time.get(), ps.max_db_time.get()],
@@ -369,9 +353,9 @@ AND ir_model.model !~ '.show$'
                     ),
                     ui.input_selectize(
                         "company_name",
-                        ui.h4("Sélection d'entreprise"),
+                        ui.h4(_("Companies")),
                         res_companies,
-                        selected=res_companies[0],
+                        selected=res_companies[1],
                         multiple=True,
                     ),
                 )
@@ -386,7 +370,6 @@ AND ir_model.model !~ '.show$'
     @reactive.event(input.date_range)
     def date_range_handler():
         values = input.date_range()
-
         ps.selected_period_low_bound.set(values[0])
         ps.selected_period_high_bound.set(values[1])
 

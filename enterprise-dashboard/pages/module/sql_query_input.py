@@ -6,8 +6,9 @@ import polars as pl
 import sqlglot.expressions
 from appdata.stored_query_repository import StoredQueryRepository
 from connect import Connect
-from pages.shared import pstates as ps
 from shiny import Inputs, Outputs, Session, module, reactive, render, ui
+
+from ..shared import pstates as ps
 
 # TODO
 ## A repository Resolver : no need to import individual repositories,
@@ -299,6 +300,7 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
 # UTILS
 def parse_postgres(q: str):
     """checks if the query is valid postgres"""
+    # TODO duplicated code to remove: see shared
     try:
         expr = sqlglot.parse_one(q, read="postgres")
 
@@ -321,6 +323,7 @@ def valid_postgres(q: str):
     """checks if the query only contains projections
     (no Create, Update or Delete allowed)
     """
+    # TODO duplicated code to remove: see shared
     if (
         q.upper().find("UPDATE") < 0
         or q.upper().find("DELETE") < 0

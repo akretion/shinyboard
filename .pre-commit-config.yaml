@@ -1,9 +1,9 @@
 exclude: |
   (?x)
-  # Ignore build and dist directories in addons
-  /build/|/dist/|
   # Custom
   first-dashboard/.*|
+  odoo_demo/.*|
+  # TODO remove line below
   enterprise-dashboard/appdata/simple_repository.py|
   # You don't usually want a bot to modify your legal texts
   (LICENSE.*|COPYING.*)

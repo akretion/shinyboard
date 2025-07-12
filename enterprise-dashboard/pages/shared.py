@@ -70,7 +70,6 @@ class PageStates:
     table_time_columns: reactive.value[dict[str, str]] = reactive.value()
 
     # GLOBAL USER FILTERS
-
     # The rightmost value of the date_range.
     selected_period_high_bound: reactive.value[datetime] = reactive.value(EPOCH)
     # The leftmost value of the data_range.

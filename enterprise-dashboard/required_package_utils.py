@@ -1,5 +1,6 @@
 import subprocess
 import tomllib
+from importlib import import_module
 
 with open("config.toml", "rb") as CONFIG:
     parsed = tomllib.load(CONFIG)
@@ -22,3 +23,13 @@ with open("config.toml", "rb") as CONFIG:
 
             except Exception:
                 print(f"{RED}ERROR{WHITE} : importing {pckg} failed")
+
+    def get_installed_package_definitions():
+        # pretty much useless if called before install_packages()
+
+        modules = []
+
+        for pckg in parsed["APP_CONFIG"]["modules"]:
+            modules.append(import_module(pckg))
+
+        return modules

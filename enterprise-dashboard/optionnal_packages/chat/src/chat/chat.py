@@ -38,7 +38,8 @@ def train_vanna():
 
 @module.ui
 def chat_module_ui():
-    return ui.page_fluid(
+    return ui.nav_panel(
+        ui.h2("Chat with VN AI"),
         ui.chat_ui("chat"),
         ui.output_text("slider_text"),
     )

@@ -3,9 +3,12 @@ from pages.main import _
 import tomllib
 
 import polars as pl
+from required_package_utils import install_packages, get_installed_package_definitions
 
-# REFACTOR #1 import pages.module.sql_query_input as sql_query_input
-# REFACTOR #1 import pages.module.stored_queries_page as stored_queries_page
+# REFACTOR #1
+# import pages.sales_page as sales_page
+# import pages.module.sql_query_input as sql_query_input
+# import pages.module.stored_queries_page as stored_queries_page
 from connect import Connect
 from pages.shared import AVAILABLE_RELS
 from pages.shared import CURRENT_USER_ID
@@ -41,6 +44,29 @@ app_ui = ui.page_sidebar(
 def app_server(input: Inputs, output: Outputs, session: Session):
     # REFACTOR #1:
     #   sql_query_input.sql_query_server("sql")
+
+    differentiator = reactive.value(0)
+
+    install_packages()
+
+    modules = get_installed_package_definitions()
+
+    def call_servers(id):
+        for mod in modules:
+            value = differentiator.get()
+            print(mod)
+            mod.package_definitions.definitions["server"](f"serv{differentiator.get()}")
+            differentiator.set(value + 1)
+
+    def display_imported_mods():
+        ui_collection = []
+
+        for mod in modules:
+            ui_collection.append(
+                mod.package_definitions.definitions["ui"](f"ui{differentiator.get()}")
+            )
+
+        return ui.navset_bar(title="nav", *ui_collection)
 
     translation = {
         _("Sales"): "sale_order",
@@ -152,30 +178,32 @@ AND ir_model.model !~ '.show$'
 
         elif in_logins.get()["valid"]:
             is_logged_in.set(True)
-        #### REFACTOR #1
-        # TO REPLACE BY A PLACEHOLDER FILE THAT LOOPS ON INSTALLED PACKAGES
-        #            return ui.page_navbar(
-        #                ui.nav_panel(
-        #                    ui.h2("Sales"),
-        #                    sales_page.module_ui("sales_mod"),
-        #                    sales_page.module_server("sales_mod"),
-        #                ),
+            #### REFACTOR #1
+            # TO REPLACE BY A PLACEHOLDER FILE THAT LOOPS ON INSTALLED PACKAGES
+            #            return ui.page_navbar(
+            #                ui.nav_panel(
+            #                    ui.h2("Sales"),
+            #                    sales_page.module_ui("sales_mod"),
+            #                    sales_page.module_server("sales_mod"),
+            #                ),
 
-        #                ui.nav_panel(
-        #                    ui.h2(_("Generate charts")),
-        #                    ui.h1(_("You're logged with {} !").format(in_logins.get()["user"])),
-        #                    ui.span(
-        #                        _("Enter SQL queries to generate visual indicators"),
-        #                    ),
-        #                sql_query_input.sql_query_input("sql"),
-        #                ),
-        #                ui.nav_panel(
-        #                    ui.h2(_("Queries")),
-        #                    stored_queries_page.stored_queries_ui("stored"),
-        #                    stored_queries_page.stored_queries_server("stored"),
-        #                ),
-        # set shared data to the currently connected user
-        #            )
+            #                ui.nav_panel(
+            #                    ui.h2(_("Generate charts")),
+            #                    ui.h1(_("You're logged with {} !").format(in_logins.get()["user"])),
+            #                    ui.span(
+            #                        _("Enter SQL queries to generate visual indicators"),
+            #                    ),
+            #                sql_query_input.sql_query_input("sql"),
+            #                ),
+            #                ui.nav_panel(
+            #                    ui.h2(_("Queries")),
+            #                    stored_queries_page.stored_queries_ui("stored"),
+            #                    stored_queries_page.stored_queries_server("stored"),
+            #                ),
+            # set shared data to the currently connected user
+            #            )
+
+            return ui.page_fluid(display_imported_mods())
 
         else:
             return ui.page_fluid(

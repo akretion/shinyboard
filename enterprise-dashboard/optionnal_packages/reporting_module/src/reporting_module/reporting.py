@@ -1,17 +1,19 @@
 from shiny import module, ui, Inputs, Outputs, Session
 
-from pages.module import product, salespersons
+import salespersons
+import product
 
 
 @module.ui
 def reporting_ui():
-    return ui.page_fluid(
+    return ui.nav_panel(
+        ui.h2("Reporting"),
         ui.navset_pill(
             ui.nav_panel(
                 ui.h4("Vendeurs"), salespersons.salespersons_ui("salespersons")
             ),
             ui.nav_panel(ui.h4("Produits"), product.product_ui("products")),
-        )
+        ),
     )
 
 

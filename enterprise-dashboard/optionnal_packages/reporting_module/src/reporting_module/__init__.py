@@ -1,2 +1,3 @@
-def hello() -> str:
-    return "Hello from reporting-module!"
+__all__ = ["package_definitions"]
+
+from . import package_definitions

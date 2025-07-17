@@ -8,9 +8,9 @@ modules=[
 
 [TABLE_TIMES]
 # Vente
-sale_order=date_order
+sale_order="date_order"
 # valeurs possibles: date_order | sale_order_create_date | sale_order_write_date
 
 # Achat
-purchase_order=date_order
+purchase_order="date_order"
 # valeurs possibles: date_order | purchase_order_create_date | purchase_order_write_date

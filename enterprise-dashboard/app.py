@@ -1,11 +1,11 @@
 from __future__ import annotations
 from pages.main import _
-import configparser
+import tomllib
 
 import polars as pl
-import pages.sales_page as sales_page
-import pages.module.sql_query_input as sql_query_input
-import pages.module.stored_queries_page as stored_queries_page
+
+# REFACTOR #1 import pages.module.sql_query_input as sql_query_input
+# REFACTOR #1 import pages.module.stored_queries_page as stored_queries_page
 from connect import Connect
 from pages.shared import AVAILABLE_RELS
 from pages.shared import CURRENT_USER_ID
@@ -39,7 +39,8 @@ app_ui = ui.page_sidebar(
 
 
 def app_server(input: Inputs, output: Outputs, session: Session):
-    sql_query_input.sql_query_server("sql")
+    # REFACTOR #1:
+    #   sql_query_input.sql_query_server("sql")
 
     translation = {
         _("Sales"): "sale_order",
@@ -151,27 +152,30 @@ AND ir_model.model !~ '.show$'
 
         elif in_logins.get()["valid"]:
             is_logged_in.set(True)
-            return ui.page_navbar(
-                ui.nav_panel(
-                    ui.h2("Sales"),
-                    sales_page.module_ui("sales_mod"),
-                    sales_page.module_server("sales_mod"),
-                ),
-                ui.nav_panel(
-                    ui.h2(_("Generate charts")),
-                    ui.h1(_("You're logged with {} !").format(in_logins.get()["user"])),
-                    ui.span(
-                        _("Enter SQL queries to generate visual indicators"),
-                    ),
-                    sql_query_input.sql_query_input("sql"),
-                ),
-                ui.nav_panel(
-                    ui.h2(_("Queries")),
-                    stored_queries_page.stored_queries_ui("stored"),
-                    stored_queries_page.stored_queries_server("stored"),
-                ),
-                # set shared data to the currently connected user
-            )
+        #### REFACTOR #1
+        # TO REPLACE BY A PLACEHOLDER FILE THAT LOOPS ON INSTALLED PACKAGES
+        #            return ui.page_navbar(
+        #                ui.nav_panel(
+        #                    ui.h2("Sales"),
+        #                    sales_page.module_ui("sales_mod"),
+        #                    sales_page.module_server("sales_mod"),
+        #                ),
+
+        #                ui.nav_panel(
+        #                    ui.h2(_("Generate charts")),
+        #                    ui.h1(_("You're logged with {} !").format(in_logins.get()["user"])),
+        #                    ui.span(
+        #                        _("Enter SQL queries to generate visual indicators"),
+        #                    ),
+        #                sql_query_input.sql_query_input("sql"),
+        #                ),
+        #                ui.nav_panel(
+        #                    ui.h2(_("Queries")),
+        #                    stored_queries_page.stored_queries_ui("stored"),
+        #                    stored_queries_page.stored_queries_server("stored"),
+        #                ),
+        # set shared data to the currently connected user
+        #            )
 
         else:
             return ui.page_fluid(
@@ -187,31 +191,31 @@ AND ir_model.model !~ '.show$'
 
     @reactive.effect
     def set_table_times():
-        conf_parser = configparser.ConfigParser()
-        conf_parser.read("config.toml")
+        with open("config.toml", "rb") as CONFIG:
+            CONFIG = tomllib.load(CONFIG)
 
-        try:
-            TABLE_TIME = conf_parser["TABLE_TIMES"]
-            new_dict = {}
+            try:
+                TABLE_TIME = CONFIG["TABLE_TIMES"]
+                new_dict = {}
 
-            for name, value in TABLE_TIME.items():
-                new_dict.update({name: value})
+                for name, value in TABLE_TIME.items():
+                    new_dict.update({name: value})
 
-            TABLE_TIME_COLUMNS.set(new_dict)
+                TABLE_TIME_COLUMNS.set(new_dict)
 
-        except Exception as EX:
-            print(
-                f"""an exception occurred (see below)
-                \n-----EXCEPTION-----\n
-                {EX}\n-----END OF EXCEPTION-----""",
-            )
-            print(
-                "The above exception is most likely due to config.toml "
-                "sections or variables being invalid.",
-            )
-            print(
-                "Please check config.toml",
-            )
+            except Exception as EX:
+                print(
+                    f"""an exception occurred (see below)
+                    \n-----EXCEPTION-----\n
+                    {EX}\n-----END OF EXCEPTION-----""",
+                )
+                print(
+                    "The above exception is most likely due to config.toml "
+                    "sections or variables being invalid.",
+                )
+                print(
+                    "Please check config.toml",
+                )
 
     @reactive.effect
     def set_df_and_shared_values():

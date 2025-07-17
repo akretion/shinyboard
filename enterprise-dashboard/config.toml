@@ -1,3 +1,10 @@
+[APP_CONFIG]
+modules=[
+    "chat",
+    "generate_charts",
+    "reporting_module"
+]
+
 
 [TABLE_TIMES]
 # Vente

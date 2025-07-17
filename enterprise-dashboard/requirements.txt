@@ -1,8 +1,7 @@
 dotenv
 faicons
 great_tables
-# not sure pandas is required
-pandas
+# removed pandas, wasn't in use
 peewee
 plotly
 polars

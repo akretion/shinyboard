@@ -264,7 +264,8 @@ AND ir_model.model !~ '.show$'
         #    print(available_tables(CURRENT_USER_ID.get(), DB))
 
         # Columns [write_date] must be renamed, else it conflicts with joined tables.
-        sale_order_joined = DB.read("""
+        sale_order_joined = DB.read(
+            """
         SELECT
             order_partner.name AS customer,
             order_user.name AS salesperson,
@@ -293,7 +294,8 @@ AND ir_model.model !~ '.show$'
 
         JOIN res_company AS order_company
         ON sale_order.company_id = order_company.id
-        """)
+        """
+        )
 
         purchase_order_joined = DB.read(
             """

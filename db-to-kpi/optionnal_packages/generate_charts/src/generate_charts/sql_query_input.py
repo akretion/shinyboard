@@ -44,7 +44,9 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
 
     input_states: Union[
         reactive.value[dict[str, reactive.value[bool]]], reactive.value[dict]
-    ] = reactive.value({})  # True: closed, False: in edition
+    ] = reactive.value(
+        {}
+    )  # True: closed, False: in edition
     ui_res_list: reactive.value[list[ui.Tag]] = reactive.value([])
 
     @render.data_frame

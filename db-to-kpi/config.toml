@@ -1,8 +1,16 @@
 [APP_CONFIG]
+
+# To the front of the UI
+[[highlighted]]
 modules=[
-    "generate_charts",
-    "chat",
     "reporting_module"
+]
+
+# Hidden in a menu
+[[hidden]]
+modules=[
+    "chat",
+    "generate_charts"
 ]
 
 

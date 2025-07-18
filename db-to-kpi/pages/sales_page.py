@@ -1,6 +1,7 @@
 from shiny import ui, module, Inputs, Outputs, Session
 from .module import sales as sales
 from .module import to_invoice as invoicing
+
 # REFACTOR #1 : from pages import reporting
 
 

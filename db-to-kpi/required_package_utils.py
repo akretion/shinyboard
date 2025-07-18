@@ -1,6 +1,8 @@
 import subprocess
 import tomllib
 from importlib import import_module
+from utils.Logger import log
+from utils.Logger import RED, GREEN, WHITE
 
 with open("config.toml", "rb") as CONFIG:
     parsed = tomllib.load(CONFIG)
@@ -17,23 +19,36 @@ with open("config.toml", "rb") as CONFIG:
         (if an ill-intentionned user puts a wrong library in the TOML, the code will install the package directly in
         the project...)
         """
+
+        installed_all = True
+        total_requested = len(parsed["APP_CONFIG"]["modules"])
+        installed = 0
+
         for pckg in parsed["APP_CONFIG"]["modules"]:
             try:
-                RED = "\u001b[31m"
-                GREEN = "\u001b[32m"
-                CYAN = "\u001b[36m"
-                WHITE = "\u001b[37m"
-
-                print(f"{CYAN}INFO{WHITE} : installing {pckg}, delegating to PIP...")
                 subprocess.run(
                     args=["pip", "install", f"./optionnal_packages/{pckg}"],
                     capture_output=True,
                     check=True,
                 )
-                print(f"{GREEN}Success !{WHITE}")
+
+                installed += 1
+                log("INFO", f"{GREEN}+{WHITE} {pckg} Successfully installed.")
 
             except Exception:
-                print(f"{RED}ERROR{WHITE} : importing {pckg} failed")
+                log("ERROR", f"{RED}+{WHITE}  Installing {pckg} failed")
+
+        if installed_all:
+            log(
+                "INFO",
+                f"✔  Successfully installed all {installed} requested packages !",
+            )
+        else:
+            log(
+                "INFO",
+                f"✔  Successfully installed {installed} requested packages (out of {total_requested})",
+            )
+            log("WARN", f"❌  Failed {total_requested - installed} installations.")
 
     def get_installed_modules():
         # pretty much useless if called before install_packages()

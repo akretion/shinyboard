@@ -3,7 +3,7 @@ from pages.main import _
 import tomllib
 
 import polars as pl
-from required_package_utils import install_packages, get_installed_package_definitions
+from required_package_utils import install_packages, get_installed_modules
 
 # REFACTOR #1
 # import pages.sales_page as sales_page
@@ -46,27 +46,33 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     #   sql_query_input.sql_query_server("sql")
 
     differentiator = reactive.value(0)
+    package_ui_collection = reactive.value([])
 
-    install_packages()
+    def package_handler():
+        """
+        ## Summary
+        - installs packages via required_package_utils.install_packages() **(blocking call)**
+        - declares UI and puts it in a list of ready-to-unpack UI
+        - calls servers.
+        \n
+        the function is called **only if the user successfully logs in** (in login_handler).
+        """
 
-    modules = get_installed_package_definitions()
+        install_packages()
+        modules = get_installed_modules()
 
-    def call_servers(id):
-        for mod in modules:
-            value = differentiator.get()
-            print(mod)
-            mod.package_definitions.definitions["server"](f"serv{differentiator.get()}")
-            differentiator.set(value + 1)
-
-    def display_imported_mods():
+        value = differentiator.get()
         ui_collection = []
 
         for mod in modules:
-            ui_collection.append(
-                mod.package_definitions.definitions["ui"](f"ui{differentiator.get()}")
-            )
+            mod.package_definitions.definitions["server"](f"pckg{value}")
 
-        return ui.navset_bar(title="nav", *ui_collection)
+            ui_collection.append(
+                mod.package_definitions.definitions["ui"](f"pckg{value}")
+            )
+            differentiator.set(value + 1)
+
+        package_ui_collection.set(ui_collection)
 
     translation = {
         _("Sales"): "sale_order",
@@ -171,6 +177,13 @@ AND ir_model.model !~ '.show$'
         CURRENT_USER_ID.set(uid)
         in_logins.set(newValue)
 
+        if (
+            not LOGINS.select("login")
+            .filter(pl.col("login") == str(input.login()).strip())
+            .is_empty()
+        ):
+            package_handler()
+
     @render.ui
     def login_handler():
         if in_logins.get()["user"] == "":
@@ -202,8 +215,9 @@ AND ir_model.model !~ '.show$'
             #                ),
             # set shared data to the currently connected user
             #            )
-
-            return ui.page_fluid(display_imported_mods())
+            return ui.navset_bar(
+                title=ui.h4("Apllications"), *package_ui_collection.get()
+            )
 
         else:
             return ui.page_fluid(

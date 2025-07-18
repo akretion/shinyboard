@@ -1,6 +1,8 @@
 [APP_CONFIG]
 modules=[
-    "generate_charts"
+    "generate_charts",
+    "chat",
+    "reporting_module"
 ]
 
 

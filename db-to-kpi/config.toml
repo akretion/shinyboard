@@ -1,13 +1,13 @@
 [APP_CONFIG]
 
 # To the front of the UI
-[[highlighted]]
+[APP_CONFIG.highlighted]
 modules=[
     "reporting_module"
 ]
 
 # Hidden in a menu
-[[hidden]]
+[APP_CONFIG.hidden]
 modules=[
     "chat",
     "generate_charts"

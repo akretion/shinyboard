@@ -47,6 +47,7 @@ def app_server(input: Inputs, output: Outputs, session: Session):
 
     differentiator = reactive.value(0)
     package_ui_collection = reactive.value([])
+    other_apps_collection = reactive.value([])
 
     def package_handler():
         """
@@ -59,20 +60,34 @@ def app_server(input: Inputs, output: Outputs, session: Session):
         """
 
         install_packages()
-        modules = get_installed_modules()
+        module_dict = get_installed_modules()
 
         value = differentiator.get()
         ui_collection = []
+        other_ui_collection = []
+        for key in module_dict.keys():
+            for mod in module_dict[f"{key}"]:
 
-        for mod in modules:
-            mod.package_definitions.definitions["server"](f"pckg{value}")
+                mod.package_definitions.definitions["server"](
+                    f"pckg{value}"
+                )  # will be activated either way
+                collection_reference = None
 
-            ui_collection.append(
-                mod.package_definitions.definitions["ui"](f"pckg{value}")
-            )
-            differentiator.set(value + 1)
+                match key:
+                    case "highlighted":
+                        collection_reference = ui_collection
+                    case "hidden":
+                        collection_reference = other_ui_collection
+                    case _:
+                        collection_reference = other_ui_collection
+
+                collection_reference.append(
+                    mod.package_definitions.definitions["ui"](f"pckg{value}")
+                )
+                differentiator.set(value + 1)
 
         package_ui_collection.set(ui_collection)
+        other_apps_collection.set(other_ui_collection)
 
     translation = {
         _("Sales"): "sale_order",
@@ -191,32 +206,17 @@ AND ir_model.model !~ '.show$'
 
         elif in_logins.get()["valid"]:
             is_logged_in.set(True)
-            #### REFACTOR #1
-            # TO REPLACE BY A PLACEHOLDER FILE THAT LOOPS ON INSTALLED PACKAGES
-            #            return ui.page_navbar(
-            #                ui.nav_panel(
-            #                    ui.h2("Sales"),
-            #                    sales_page.module_ui("sales_mod"),
-            #                    sales_page.module_server("sales_mod"),
-            #                ),
 
-            #                ui.nav_panel(
-            #                    ui.h2(_("Generate charts")),
-            #                    ui.h1(_("You're logged with {} !").format(in_logins.get()["user"])),
-            #                    ui.span(
-            #                        _("Enter SQL queries to generate visual indicators"),
-            #                    ),
-            #                sql_query_input.sql_query_input("sql"),
-            #                ),
-            #                ui.nav_panel(
-            #                    ui.h2(_("Queries")),
-            #                    stored_queries_page.stored_queries_ui("stored"),
-            #                    stored_queries_page.stored_queries_server("stored"),
-            #                ),
-            # set shared data to the currently connected user
-            #            )
-            return ui.navset_bar(
-                title=ui.h4("Apllications"), *package_ui_collection.get()
+            return (
+                ui.navset_bar(
+                    *package_ui_collection.get(),
+                    ui.nav_spacer(),
+                    ui.nav_menu(
+                        ui.h2("All apps"),
+                        *other_apps_collection.get(),
+                    ),
+                    title="Applications > ",
+                ),
             )
 
         else:

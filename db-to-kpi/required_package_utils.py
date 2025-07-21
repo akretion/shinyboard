@@ -21,22 +21,24 @@ with open("config.toml", "rb") as CONFIG:
         """
 
         installed_all = True
-        total_requested = len(parsed["APP_CONFIG"]["modules"])
+
+        total_requested = 3
         installed = 0
 
-        for pckg in parsed["APP_CONFIG"]["modules"]:
-            try:
-                subprocess.run(
-                    args=["pip", "install", f"./optionnal_packages/{pckg}"],
-                    capture_output=True,
-                    check=True,
-                )
+        for category in parsed["APP_CONFIG"].keys():
+            for pckg in parsed["APP_CONFIG"][f"{category}"]["modules"]:
+                try:
+                    subprocess.run(
+                        args=["pip", "install", f"./optionnal_packages/{pckg}"],
+                        capture_output=True,
+                        check=True,
+                    )
 
-                installed += 1
-                log("INFO", f"{GREEN}+{WHITE} {pckg} Successfully installed.")
+                    installed += 1
+                    log("INFO", f"{GREEN}+{WHITE} {pckg} Successfully installed.")
 
-            except Exception:
-                log("ERROR", f"{RED}+{WHITE}  Installing {pckg} failed")
+                except Exception:
+                    log("ERROR", f"{RED}+{WHITE}  Installing {pckg} failed")
 
         if installed_all:
             log(
@@ -50,12 +52,19 @@ with open("config.toml", "rb") as CONFIG:
             )
             log("WARN", f"❌  Failed {total_requested - installed} installations.")
 
-    def get_installed_modules():
+    def get_installed_modules() -> dict[str, list]:
         # pretty much useless if called before install_packages()
+        main_modules = []
+        other_modules = []
 
-        modules = []
+        for category in parsed["APP_CONFIG"].keys():
+            for pckg in parsed["APP_CONFIG"][f"{category}"]["modules"]:
+                match category:
+                    case "highlighted":
+                        main_modules.append(import_module(pckg))
+                    case "hidden":
+                        other_modules.append(import_module(pckg))
+                    case _:
+                        other_modules.append(import_module(pckg))
 
-        for pckg in parsed["APP_CONFIG"]["modules"]:
-            modules.append(import_module(pckg))
-
-        return modules
+        return {"highlighted": main_modules, "hidden": other_modules}

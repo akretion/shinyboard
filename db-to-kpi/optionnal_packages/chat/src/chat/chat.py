@@ -53,7 +53,6 @@ def chat_module_ui():
 def chat_module_server(input: Inputs, output: Outputs, session: Session):
     chat = ui.Chat("chat")
     print("server called")
-
     differentiator = 0
     runtime_server_funcs = reactive.value({})
 
@@ -64,11 +63,9 @@ def chat_module_server(input: Inputs, output: Outputs, session: Session):
     @chat.on_user_submit
     async def handle_chat(u_input: str):
         sql = vn.generate_sql(u_input)
-
         if sql.find("JOIN") == -1:
             # corrects the query for dataframe manipulation
             df_name = getTableNameFromQuery(sql)
-
             df_tailored_sql = sql.replace(df_name, "self")
             fromDF = dataframes[df_name].sql(df_tailored_sql)
 
@@ -79,7 +76,6 @@ def chat_module_server(input: Inputs, output: Outputs, session: Session):
 
             runtime_server_funcs.get()[f"{differentiator}"] = outputDF
             ui_res = ui.output_data_frame(f"{differentiator}")
-
         else:
 
             @render.ui
@@ -92,7 +88,6 @@ def chat_module_server(input: Inputs, output: Outputs, session: Session):
 
         px = vn.generate_plotly_code(u_input)
         vn._sanitize_plotly_code(px)
-
         if vn.is_sql_valid(sql):
             print(ui_res)
             await chat.append_message(ui_res)
@@ -109,10 +104,8 @@ def getTableNameFromQuery(query: str):
         should be executed against.
     """
     exploded = query.split("FROM")
-
     if len(exploded) >= 2:
         print(exploded)
         return exploded[1].strip(";").strip().replace("\n", " ").split(" ")[0]
-
     else:
         return query

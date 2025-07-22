@@ -1,14 +1,11 @@
 from __future__ import annotations
 from pages.main import _
 import tomllib
+import logging
 
 import polars as pl
 from required_package_utils import install_packages, get_installed_modules
 
-# REFACTOR #1
-# import pages.sales_page as sales_page
-# import pages.module.sql_query_input as sql_query_input
-# import pages.module.stored_queries_page as stored_queries_page
 from connect import Connect
 from pages.shared import AVAILABLE_RELS
 from pages.shared import CURRENT_USER_ID
@@ -58,21 +55,17 @@ def app_server(input: Inputs, output: Outputs, session: Session):
         \n
         the function is called **only if the user successfully logs in** (in login_handler).
         """
-
         install_packages()
         module_dict = get_installed_modules()
-
         value = differentiator.get()
         ui_collection = []
         other_ui_collection = []
         for key in module_dict.keys():
             for mod in module_dict[f"{key}"]:
-
                 mod.package_definitions.definitions["server"](
                     f"pckg{value}"
                 )  # will be activated either way
                 collection_reference = None
-
                 match key:
                     case "highlighted":
                         collection_reference = ui_collection
@@ -80,12 +73,10 @@ def app_server(input: Inputs, output: Outputs, session: Session):
                         collection_reference = other_ui_collection
                     case _:
                         collection_reference = other_ui_collection
-
                 collection_reference.append(
                     mod.package_definitions.definitions["ui"](f"pckg{value}")
                 )
                 differentiator.set(value + 1)
-
         package_ui_collection.set(ui_collection)
         other_apps_collection.set(other_ui_collection)
 
@@ -94,15 +85,12 @@ def app_server(input: Inputs, output: Outputs, session: Session):
         _("Purchases"): "purchase_order",
         _("Partners"): "res_partner",
     }
-
     # CONSTANTS
     DB = Connect("dsn1")
     LOGINS = DB.read("SELECT id, login FROM res_users")
-
     # REACTIVE VARS - UI depends on them
     in_logins = reactive.value({"valid": False, "user": "", "user_id": -1})
     is_logged_in = reactive.value(False)
-
     reactive.value(pl.DataFrame())
 
     # SIDEBAR
@@ -113,7 +101,6 @@ def app_server(input: Inputs, output: Outputs, session: Session):
                 ui.h3(f"{_('Connected as')} {in_logins.get()['user']}"),
                 ui.input_action_button("disconnect", _("Disconnect")),
             )
-
         else:
             return ui.div(
                 ui.input_text(
@@ -142,7 +129,6 @@ AND res_users.id = {in_logins.get()["user_id"]}
 AND ir_model.model !~ '.show$'
             """,
         )
-
         # assignation des schémas dans shared
         available_tables_df.select("table_name").to_series().to_list()
         table_name_schema_dict = {}
@@ -154,9 +140,7 @@ AND ir_model.model !~ '.show$'
             table_name_schema_dict[rel.replace(".", "_")] =
             DB.read(f"SELECT * FROM {rel.replace(".", "_")}").schema
         """
-
         print(table_name_schema_dict)
-
         # retour de l'UI
 
     # CENTER
@@ -187,11 +171,9 @@ AND ir_model.model !~ '.show$'
             "user": input.login(),
             "user_id": uid,
         }
-
         CURRENT_USER_NAME.set(input.login())
         CURRENT_USER_ID.set(uid)
         in_logins.set(newValue)
-
         if (
             not LOGINS.select("login")
             .filter(pl.col("login") == str(input.login()).strip())
@@ -203,10 +185,8 @@ AND ir_model.model !~ '.show$'
     def login_handler():
         if in_logins.get()["user"] == "":
             return fallback
-
         elif in_logins.get()["valid"]:
             is_logged_in.set(True)
-
             return (
                 ui.navset_bar(
                     *package_ui_collection.get(),
@@ -218,7 +198,6 @@ AND ir_model.model !~ '.show$'
                     title="Applications > ",
                 ),
             )
-
         else:
             return ui.page_fluid(
                 ui.h1(_(f"No user named {in_logins.get()['user']}")),
@@ -235,34 +214,33 @@ AND ir_model.model !~ '.show$'
     def set_table_times():
         with open("config.toml", "rb") as CONFIG:
             CONFIG = tomllib.load(CONFIG)
-
             try:
                 TABLE_TIME = CONFIG["TABLE_TIMES"]
                 new_dict = {}
-
                 for name, value in TABLE_TIME.items():
                     new_dict.update({name: value})
-
                 TABLE_TIME_COLUMNS.set(new_dict)
-
             except Exception as EX:
-                print(
-                    f"""an exception occurred (see below)
-                    \n-----EXCEPTION-----\n
-                    {EX}\n-----END OF EXCEPTION-----""",
+                logging.log(logging.ERROR, "ERROR : An exception occured (see below)")
+                logging.log(
+                    logging.ERROR,
+                    f"""\n-----EXCEPTION-----\n
+                            {EX}
+                            \n-----END OF EXCEPTION-----""",
                 )
-                print(
+
+                logging.log(
+                    logging.WARN,
                     "The above exception is most likely due to config.toml "
                     "sections or variables being invalid.",
                 )
-                print(
+                logging.log(
+                    logging.WARN,
                     "Please check config.toml",
                 )
 
     @reactive.effect
     def set_df_and_shared_values():
-        #    print(available_tables(CURRENT_USER_ID.get(), DB))
-
         # Columns [write_date] must be renamed, else it conflicts with joined tables.
         sale_order_joined = DB.read(
             """
@@ -296,7 +274,6 @@ AND ir_model.model !~ '.show$'
         ON sale_order.company_id = order_company.id
         """
         )
-
         purchase_order_joined = DB.read(
             """
         SELECT
@@ -374,7 +351,6 @@ AND ir_model.model !~ '.show$'
             FROM product_product
             """
         )
-
         OTHER_RELS.set(
             {
                 "product_product": product_product,
@@ -382,7 +358,6 @@ AND ir_model.model !~ '.show$'
                 "res_company": res_company,
             }
         )
-
         AVAILABLE_RELS.set(
             {
                 "sale_order": sale_order_joined,
@@ -449,7 +424,6 @@ AND ir_model.model !~ '.show$'
     @reactive.event(input.date_range)
     def date_range_handler():
         values = input.date_range()
-
         SELECTED_PERIOD_LOW_BOUND.set(values[0])
         SELECTED_PERIOD_HIGH_BOUND.set(values[1])
 

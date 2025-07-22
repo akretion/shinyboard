@@ -19,12 +19,9 @@ with open("config.toml", "rb") as CONFIG:
         (if an ill-intentionned user puts a wrong library in the TOML, the code will install the package directly in
         the project...)
         """
-
         installed_all = True
-
         total_requested = 3
         installed = 0
-
         for category in parsed["APP_CONFIG"].keys():
             for pckg in parsed["APP_CONFIG"][f"{category}"]["modules"]:
                 try:
@@ -33,10 +30,8 @@ with open("config.toml", "rb") as CONFIG:
                         capture_output=True,
                         check=True,
                     )
-
                     installed += 1
                     log("INFO", f"{GREEN}+{WHITE} {pckg} Successfully installed.")
-
                 except Exception:
                     log("ERROR", f"{RED}+{WHITE}  Installing {pckg} failed")
 
@@ -56,7 +51,6 @@ with open("config.toml", "rb") as CONFIG:
         # pretty much useless if called before install_packages()
         main_modules = []
         other_modules = []
-
         for category in parsed["APP_CONFIG"].keys():
             for pckg in parsed["APP_CONFIG"][f"{category}"]["modules"]:
                 match category:
@@ -66,5 +60,4 @@ with open("config.toml", "rb") as CONFIG:
                         other_modules.append(import_module(pckg))
                     case _:
                         other_modules.append(import_module(pckg))
-
         return {"highlighted": main_modules, "hidden": other_modules}

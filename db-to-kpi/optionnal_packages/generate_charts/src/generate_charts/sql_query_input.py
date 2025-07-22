@@ -52,13 +52,10 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
     @render.data_frame
     def selected_df():
         base_df = AVAILABLE_RELS.get()[SELECTED_DATAFRAME_NAME.get()]
-
         dotted_row = pl.DataFrame(
             [[None for _ in base_df.columns]], schema=base_df.schema
         )
-
         peek = pl.concat([base_df.head(3), dotted_row, base_df.tail(3)], how="vertical")
-
         return peek
 
     @render.ui
@@ -70,7 +67,6 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
     def query_handler():
         if parse_postgres(input.query()) and valid_postgres(input.query()):
             CURRENT_DATAFRAME = AVAILABLE_RELS.get()[f"{SELECTED_DATAFRAME_NAME.get()}"]
-
         if (
             input.query().replace("my_table", "test") == input.query()
             and input.query().replace("self", "test") == input.query()
@@ -94,36 +90,29 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                 )
                 else input.query().replace("self", f"{SELECTED_DATAFRAME_NAME.get()}")
             )
-
             title_to_store: reactive.value[str] = reactive.value(query_with_df_name)
-
             current_diff = differentiator.get()
-
             # Graph case
             if input.query().upper().find("GROUP BY") > 0:
                 expr = sqlglot.parse_one(query_with_self)
                 x_data = []
                 y_data = []
-
                 for col in expr.args["expressions"]:
                     if type(col) is sqlglot.expressions.Column:
                         x_data = (
                             CURRENT_DATAFRAME.select(f"{col}").to_series().to_list()
                         )
-
                     elif (
                         isinstance(col, sqlglot.expressions.Alias)
                         and len(y_data) == 0
                         or isinstance(col, sqlglot.expressions.AggFunc)
                     ):
                         agg_col_name = col.args["this"].this
-
                         y_data = (
                             CURRENT_DATAFRAME.select(f"{agg_col_name}")
                             .to_series()
                             .to_list()
                         )
-
                     # should never happen
                     else:
                         print(inspect.getmro(type(col)))
@@ -199,8 +188,6 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                             ),
                         )
                 except KeyError:
-                    # print(f"key {state_diff}{current_diff} doesn't exist in input_states")
-                    # print(f"input_states' keys : {input_states.get().keys()}")
                     return ui.notification_show("**sonic 2 game overr**")
 
             @reactive.effect
@@ -216,7 +203,6 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                 nonlocal title_to_store
                 title_to_store.set(input[f"{input_diff}{current_diff}"]())
                 input_states.get()[f"{state_diff}{current_diff}"].set(True)
-
                 ui.notification_show(ui.h3("Titre modifié."), type="message")
 
             ## SAVING TO DB - data independant ##
@@ -228,15 +214,11 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                     query=query_with_df_name,
                     df_key_name=SELECTED_DATAFRAME_NAME.get(),
                 )
-
                 ui.notification_show(ui.h3("Requête sauvegardée."), type="message")
-
-            ###
 
             @output(id=f"{button_diff}{current_diff}")
             @render.ui
             def buttonfunc():
-                # print(f'differentiator in button func: {differentiator.get()}')
                 return ui.card_footer(
                     ui.row(
                         ui.column(
@@ -253,11 +235,6 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
                         ),
                     )
                 )
-
-                # CALLED FIRST
-                # adds a new state set to 'closed' (True)
-
-                # print("ui res list updated")
 
             differentiator.set(differentiator.get() + 1)
 
@@ -288,7 +265,6 @@ def sql_query_server(input: Inputs, output: Outputs, session: Session):
             return ui.card(ui.card_header(pl_title), ui.card_body(pl_text))
 
         ui_res_list.set([*ui_res_list.get(), ui.output_ui(f"{differentiator.get()}")])
-
         differentiator.set(differentiator.get() + 1)
 
 
@@ -297,17 +273,13 @@ def parse_postgres(q: str):
     """checks if the query is valid postgres"""
     try:
         expr = sqlglot.parse_one(q, read="postgres")
-
         # cases not detected by sqlglot
         if isinstance(expr, sqlglot.expressions.Select) and not expr.expressions:
             raise sqlglot.ParseError("Incomplete SELECT statement, no column specified")
-
         return True
-
     except sqlglot.ParseError as parse_error:
         print(parse_error)
         return False
-
     except Exception as error:
         print(error)
         return False

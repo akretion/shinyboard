@@ -74,14 +74,12 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
                 .group_by("salesperson")
                 .agg(pl.col("amount_total").sum())
             )
-
             fig = px.bar(
                 title="Revenus par vendeurs",
                 data_frame=sale_order_grouped_by_amount_tt,
                 x="salesperson",
                 y="amount_total",
             )
-
             return fig
 
         except KeyError as KE:
@@ -139,7 +137,6 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
             .sort(by="id", descending=True)
             .rename({"id": "commandes"})
         )
-
         return GT(clients_ranked)
 
     @render.ui
@@ -149,14 +146,12 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_client_revenue_df():
         sale_order_line = get_sale_order_line_filtered()
-
         clients_ranked = (
             sale_order_line.select("customer", "price_total")
             .group_by("customer")
             .agg(pl.col("price_total").sum())
             .sort(by="price_total", descending=True)
         )
-
         return GT(clients_ranked)
 
     @render.ui

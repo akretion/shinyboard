@@ -11,6 +11,7 @@ from pages.shared import SELECTED_PERIOD_HIGH_BOUND
 from pages.shared import SELECTED_PERIOD_LOW_BOUND
 from pages.shared import SELECTED_COMPANY_NAMES
 from pages.shared import TABLE_TIME_COLUMNS
+from great_tables import GT
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -57,7 +58,7 @@ def product_ui():
         ui.h2("Ventes de produits"),
         ui.hr(),
         ui.h3("par revenus générés"),
-        output_widget("display_product_plot"),
+        ui.output_ui("display_product_plot_ui"),
         ui.output_ui("redirect_script"),
         ui.output_ui("product_plot_widget"),
         ui.h3("par unités vendues"),
@@ -69,9 +70,12 @@ def product_ui():
 def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     link: reactive.value[str] = reactive.value("http://localhost:8069/odoo/products/0")
     redirecting_script: reactive.value[str] = reactive.value("")
+
     graph_types: dict[str, reactive.value[str]] = {
-        "best_sellers_qty": reactive.value("bar")
+        "best_sellers_qty": reactive.value("bar"),
+        "all_products": reactive.value("pie"),
     }
+    selected_graph_type_product_plot: reactive.value[str] = reactive.value("bar")
 
     def get_product_product():
         return OTHER_RELS.get()["product_product"]
@@ -93,7 +97,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             )
         )
 
-    # Best sellers by units sold
+    # BEST SELLERS BY UNITS SOLD
     @reactive.calc
     def get_best_sellers_qty_df():
         sale_order_line = get_sale_order_line_filtered()
@@ -105,18 +109,26 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             .cast({"product_uom_qty": pl.Int32})
         )
 
+    # only the visual
     @render_plotly
     def get_best_sellers_qty_plotly():
         df = get_best_sellers_qty_df()
 
         match graph_types["best_sellers_qty"].get():
             case "bar":
-                return px.bar(data_frame=df, x="name", y="product_uom_qty")
+                return px.bar(
+                    data_frame=df, x="name", y="product_uom_qty", width=1200, height=800
+                )
             case "line":
-                return px.area(data_frame=df, x="name", y="product_uom_qty")
+                return px.area(
+                    data_frame=df, x="name", y="product_uom_qty", width=1200, height=800
+                )
             case _:
-                return px.bar(data_frame=df, x="name", y="product_uom_qty")
+                return px.bar(
+                    data_frame=df, x="name", y="product_uom_qty", width=1200, height=800
+                )
 
+    # both the visual and the input - what's displayed by shiny
     @render.ui
     def display_best_sellers_qty_ui():
         return ui.row(
@@ -128,122 +140,116 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             output_widget("get_best_sellers_qty_plotly"),
         )
 
+    # sets the correct value in graph type according to uinput
     @reactive.effect
     @reactive.event(inputs.graph_type_best_sellers_qty)
     def handle_best_sellers_qty_input():
         new_type = inputs.graph_type_best_sellers_qty()
         graph_types["best_sellers_qty"].set(new_type)
 
-    # Product Pie by revenue
-    def get_product_plot():
-        try:
-            sale_order_line = get_sale_order_line_filtered()
-
-            sale_order_line_grouped = (
-                sale_order_line.select(
-                    "name",
-                    "product_uom_qty",
-                    "price_unit",
-                    "id",
-                )
-                .group_by("name")
-                .agg(
-                    pl.col("price_unit").sum(),
-                    pl.col("product_uom_qty").sum(),
-                    pl.col("id").count(),
-                )
-                .select("name", "product_uom_qty", "price_unit")
+    # PRODUCT PIE BY REVENUE
+    def get_product_plot_df():
+        sale_order_line = get_sale_order_line_filtered()
+        return (
+            sale_order_line.select(
+                "name",
+                "product_uom_qty",
+                "price_unit",
+                "id",
             )
-
-            name_labels = (
-                sale_order_line_grouped.select(
-                    "name",
-                )
-                .to_series()
-                .to_list()
+            .group_by("name")
+            .agg(
+                pl.col("price_unit").sum(),
+                pl.col("product_uom_qty").sum(),
+                pl.col("id").count(),
             )
-            qty_ordered_labels = (
-                sale_order_line_grouped.select(
-                    "price_unit",
+            .select("name", "product_uom_qty", "price_unit")
+        )
+
+    @render_plotly
+    def get_product_plot_plotly():
+        df = get_product_plot_df()
+        match graph_types["all_products"].get():
+            case "pie":
+                fig: FigureWidget | Figure = px.pie(
+                    df,
+                    values="price_unit",
+                    names="name",
+                    width=1200,
+                    height=800,
                 )
-                .to_series()
-                .to_list()
-            )
-
-            labels: list[str] = []
-
-            for i in range(len(name_labels)):
-                labels.append(
-                    f"{name_labels[i]}\nrevenue:{int(qty_ordered_labels[i])}€",
-                )
-
-            fig: FigureWidget | Figure = px.pie(
-                sale_order_line_grouped,
-                values="price_unit",
-                names="name",
-                width=1200,
-                height=800,
-            )
-            fig.update_layout(
-                legend=dict(
-                    x=1,
-                    y=0,
-                    traceorder="normal",
-                    title_font_family=None,
-                    font=dict(
-                        family=None,
-                        size=15,
-                        color="black",
+                fig.update_layout(
+                    legend=dict(
+                        x=1,
+                        y=0,
+                        traceorder="normal",
+                        title_font_family=None,
+                        font=dict(
+                            family=None,
+                            size=15,
+                            color="black",
+                        ),
+                        bgcolor="LightSteelBlue",
+                        bordercolor="Black",
+                        borderwidth=1,
                     ),
-                    bgcolor="LightSteelBlue",
-                    bordercolor="Black",
-                    borderwidth=1,
-                ),
+                )
+                fig: FigureWidget | Figure = go.FigureWidget(fig.data, fig.layout)
+                fig.data[0].on_click(handle_pie_click)  # type: ignore
+                return fig
+
+            case "bar":
+                fig = px.bar(df, x="name", y="price_unit", width=1200, height=800)
+                fig.data[0].on_click(handle_pie_click)  # type: ignore
+                return fig
+
+    @render.ui
+    def display_product_plot_input():
+        return (
+            ui.input_select(
+                "graph_type_product_plot",
+                ui.span("type de graphe"),
+                ["pie", "bar", "dataframe"],
+            ),
+        )
+
+    @render.ui
+    def display_product_plot_ui():
+        if graph_types["all_products"].get() != "dataframe":
+            return ui.row(
+                ui.output_ui("display_product_plot_input"),
+                output_widget("get_product_plot_plotly"),
+            )
+        else:
+            return ui.row(
+                ui.output_ui("display_product_plot_input"), GT(get_product_plot_df())
             )
 
-            fig: FigureWidget | Figure = go.FigureWidget(fig.data, fig.layout)
+    @reactive.effect
+    @reactive.event(inputs.graph_type_product_plot)
+    def handle_product_plot_input():
+        new_type = inputs.graph_type_product_plot()
+        graph_types["all_products"].set(new_type)
 
-            fig.data[0].on_click(handle_click)  # type: ignore
-
-            return fig
-
-        except KeyError as KE:
-            print(
-                f"as KeyError has occurred, it most likely means the table you're trying to access isn't available.\n------EXCEPTIONc\n{KE}\n------ENF OF EXCEPTION------",
-            )
-
-        except Exception as EX:
-            print(EX)
-
-    @render_plotly  # type: ignore
-    def display_product_plot():
-        return get_product_plot()
-
-    def handle_click(trace, points, state):
+    def handle_pie_click(trace, points, state):
         product_template = get_product_product()
-
         labels = trace.labels
         selected = f"{labels[points.point_inds[0]]}"
-
         split = selected.split("]")
-
         if split:
             selected = split[0].strip().replace("[", "")
-
             my_id = (
                 product_template.filter(pl.col("default_code").eq(f"{selected}"))
                 .select("product_tmpl_id")
                 .to_series()
                 .to_list()
             )
-
             link.set(f"http://localhost:8069/odoo/products/{my_id[0]}")
             redirecting_script.set(
                 f"""
             window.open('{link.get()}', '_blank')
             """
             )
-
         else:
             print("this looks like a service, not a product...")
 
@@ -258,7 +264,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_trending_category_units_sold():
         sale_order_line = get_sale_order_line_filtered()
-
         info = (
             sale_order_line.select("category", "id")
             .group_by("category")
@@ -267,7 +272,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             .limit(1)
             .to_dict()
         )
-
         if info["category"].is_empty() or info["id"].is_empty():
             return {
                 "category": "aucune catégorie pour la période sélectionnée",
@@ -279,7 +283,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     @render.ui
     def display_trending_category_units_sold():
         result = get_trending_category_units_sold()
-
         return ui.span(
             ui.h2(f"{result['category']}"),
             ui.h4(f"avec {result['count']} unités vendues."),
@@ -288,7 +291,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_trending_category_revenue():
         sale_order_line = get_sale_order_line_filtered()
-
         info = (
             sale_order_line.select("category", "price_total")
             .group_by("category")
@@ -297,7 +299,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             .limit(1)
             .to_dict()
         )
-
         if info["category"].is_empty() or info["price_total"].is_empty():
             return {
                 "category": "pas de revenu pour la période sélectionnée",
@@ -309,7 +310,6 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     @render.ui
     def display_trending_category_revenue():
         result = get_trending_category_revenue()
-
         return ui.span(
             ui.h2(f"{result['category']}"),
             ui.h4(f"avec {result['price']}$ de revenu généré."),

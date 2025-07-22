@@ -13,7 +13,6 @@ from connect import Connect
 from peewee import SqliteDatabase
 from shiny import reactive
 
-
 # CONSTANTS
 EPOCH = datetime(1970, 1, 1, 0, 0, 0)
 
@@ -42,11 +41,9 @@ def available_tables(uid: int, connection: Connect):
         AND ir_model.model !~ '.show$'
         """,
     )
-
     # assignation des schémas dans shared
     available_tables_df.select("table_name").to_series().to_list()
     table_name_schema_dict = {}
-
     print(table_name_schema_dict)
 
 
@@ -91,19 +88,15 @@ def parse_postgres(q: str):
     """checks if the query is valid postgres."""
     try:
         expr = sqlglot.parse_one(q, read="postgres")
-
         # cases not detected by sqlglot
         if isinstance(expr, sqlglot.expressions.Select) and not expr.expressions:
             raise sqlglot.ParseError(
                 "Incomplete SELECT statement, no column specified",
             )
-
         return True
-
     except sqlglot.ParseError as parse_error:
         print(parse_error)
         return False
-
     except Exception as error:
         print(error)
         return False

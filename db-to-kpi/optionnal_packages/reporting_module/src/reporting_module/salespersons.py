@@ -3,12 +3,7 @@ from __future__ import annotations
 import plotly.express as px
 import polars as pl
 from great_tables import GT
-from pages.shared import AVAILABLE_RELS
-from pages.shared import OTHER_RELS
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import TABLE_TIME_COLUMNS
-from pages.shared import SELECTED_COMPANY_NAMES
+from pages.shared import APP_CONSTANTS
 from shiny import Inputs
 from shiny import module
 from shiny import Outputs
@@ -48,21 +43,21 @@ def salespersons_ui():
 def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     @reactive.calc
     def get_sale_order_filtered():
-        return AVAILABLE_RELS.get()["sale_order"].filter(
-            pl.col(TABLE_TIME_COLUMNS.get()["sale_order"]).is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(),
-                SELECTED_PERIOD_HIGH_BOUND.get(),
+        return APP_CONSTANTS.AVAILABLE_RELS.get()["sale_order"].filter(
+            pl.col(APP_CONSTANTS.TABLE_TIME_COLUMNS.get()["sale_order"]).is_between(
+                APP_CONSTANTS.SELECTED_PERIOD_LOW_BOUND.get(),
+                APP_CONSTANTS.SELECTED_PERIOD_HIGH_BOUND.get(),
             ),
-            pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+            pl.col("company").is_in(APP_CONSTANTS.SELECTED_COMPANY_NAMES.get()),
         )
 
     def get_sale_order_line_filtered():
-        return OTHER_RELS.get()["sale_order_line"].filter(
+        return APP_CONSTANTS.OTHER_RELS.get()["sale_order_line"].filter(
             pl.col("create_date").is_between(
-                SELECTED_PERIOD_LOW_BOUND.get(),
-                SELECTED_PERIOD_HIGH_BOUND.get(),
+                APP_CONSTANTS.SELECTED_PERIOD_LOW_BOUND.get(),
+                APP_CONSTANTS.SELECTED_PERIOD_HIGH_BOUND.get(),
             ),
-            pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+            pl.col("company").is_in(APP_CONSTANTS.SELECTED_COMPANY_NAMES.get()),
         )
 
     def get_salespersons_plot():
@@ -124,7 +119,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
 
     @render.text
     def display_sales_plot_text():
-        return f"Ventes (du {SELECTED_PERIOD_LOW_BOUND.get()} au {SELECTED_PERIOD_HIGH_BOUND.get()})"
+        return f"Ventes (du {APP_CONSTANTS.SELECTED_PERIOD_LOW_BOUND.get()} au {APP_CONSTANTS.SELECTED_PERIOD_HIGH_BOUND.get()})"
 
     @reactive.calc
     def get_client_df():

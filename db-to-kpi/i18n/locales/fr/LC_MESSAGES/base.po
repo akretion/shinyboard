@@ -9,78 +9,86 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-07-10 20:51+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2025-07-23 HO:MI+ZONE\n"
+"Last-Translator: Salem Maël <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: FRENCH \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: app.py:46
 msgid "Sales"
-msgstr ""
+msgstr "Ventes"
 
 #: app.py:47
 msgid "Purchases"
-msgstr ""
+msgstr "Achats"
 
 #: app.py:48
 msgid "Partners"
-msgstr ""
+msgstr "Partenaires"
 
 #: app.py:67
 msgid "Disconnect"
-msgstr ""
+msgstr "Se déconnecter"
 
 #: app.py:75
-msgid "Lower identifier"
-msgstr ""
+msgid "Lowercase identifier"
+msgstr "Identifiant en minuscule"
 
 #: app.py:77
 msgid "Password"
-msgstr ""
+msgstr "Mot de Passe"
 
 #: app.py:78
 msgid "Log in"
-msgstr ""
+msgstr "Se connecter"
 
 #: app.py:119
 msgid "Log in to an Odoo user"
-msgstr ""
+msgstr "Connectez-vous à un utilisateur Odoo"
 
 #: app.py:121
 msgid "This will allow you to have access to appropriate indicators"
-msgstr ""
+msgstr "Cela vous permettra d'avoir accès aux indicateurs qui lui sont appropriés."
 
 #: app.py:162
 msgid "Generate charts"
-msgstr ""
+msgstr "Génération de visuels"
 
 #: app.py:163
 msgid "You're logged with {} !"
-msgstr ""
+msgstr "Vous êtes connectés en tant que {} !"
 
 #: app.py:165
-msgid "Enter SQL queries to generate visual indicators"
-msgstr ""
+msgid "Type SQL queries to generate visual indicators"
+msgstr "Tapez des requêtes SQL pour générer des visuels"
 
 #: app.py:170
 msgid "Queries"
-msgstr ""
+msgstr "Requêtes"
 
 #: app.py:179
 msgid "No user named {in_logins.get()['user']}"
-msgstr ""
+msgstr "Pas d'utilisateur nommé {in_logins.get()['user']}"
 
 #: app.py:180
 msgid "Please check entered informations."
-msgstr ""
+msgstr "Veuillez vérifier les informations que vous avez utilisé"
 
 #: app.py:342
-msgid "Data source"
-msgstr ""
+msgid "Source"
+msgstr "Source"
 
 #: app.py:352
 msgid "Dates"
-msgstr ""
+msgstr "Dates"
+
+#: app.py:421
+msgid "Company"
+msgstr "Société"
+
+#: sql_query_input.py:31
+msgid "SQL Query"
+msgstr "Requête SQL"

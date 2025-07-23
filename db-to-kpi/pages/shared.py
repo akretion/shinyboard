@@ -7,21 +7,12 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from dataclasses import dataclass
 import polars as pl
 import sqlglot.expressions
 from connect import Connect
 from peewee import SqliteDatabase
 from shiny import reactive
-
-# CONSTANTS
-EPOCH = datetime(1970, 1, 1, 0, 0, 0)
-
-# ORM DATABASE
-DB_CONF = SqliteDatabase("odoo_shiny.db")
-
-# CREDENTIALS
-CURRENT_USER_ID = reactive.value(-1)
-CURRENT_USER_NAME = reactive.value("")
 
 
 # USER UTILS
@@ -49,38 +40,68 @@ def available_tables(uid: int, connection: Connect):
 
 # DATAFRAME DATA
 
-AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-# tables available to the user.
 
-SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
-# Holds the canonical, in DB name of the currently selected table.
+@dataclass
+class Constants:
 
-FRENCH_NAME: reactive.value[str] = reactive.value("")
-# Holds the french name of the currently selected table.
+    instance = None
 
-MIN_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
-# Minimum time found in database.
+    @staticmethod
+    def get_instance():
+        if not Constants.instance:
+            Constants.instance = Constants()
+        return Constants.instance
 
-MAX_DB_TIME: reactive.value[datetime] = reactive.value(EPOCH)
-# Maximum time found in database.
+    def __init__(self):
 
-OTHER_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
-# tables available for internal use.
+        # CONSTANTS
+        self.EPOCH = datetime(1970, 1, 1, 0, 0, 0)
 
-TABLE_TIME_COLUMNS: reactive.value[dict[str, str]] = reactive.value()
-# Associates table names to their respective columns that should be used for time calculations.
+        # ORM DATABASE
+        self.DB_CONF = SqliteDatabase("odoo_shiny.db")
+
+        # CREDENTIALS
+        self.CURRENT_USER_ID = reactive.value(-1)
+        self.CURRENT_USER_NAME = reactive.value("")
+
+        self.AVAILABLE_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+        # tables available to the user.
+
+        self.SELECTED_DATAFRAME_NAME: reactive.value[str] = reactive.value("")
+        # Holds the canonical, in DB name of the currently selected table.
+
+        self.FRENCH_NAME: reactive.value[str] = reactive.value("")
+        # Holds the french name of the currently selected table.
+
+        self.MIN_DB_TIME: reactive.value[datetime] = reactive.value(self.EPOCH)
+        # Minimum time found in database.
+
+        self.MAX_DB_TIME: reactive.value[datetime] = reactive.value(self.EPOCH)
+        # Maximum time found in database.
+
+        self.OTHER_RELS: reactive.value[dict[str, pl.DataFrame]] = reactive.value()
+        # tables available for internal use.
+
+        self.TABLE_TIME_COLUMNS: reactive.value[dict[str, str]] = reactive.value()
+        # Associates table names to their respective columns that should be used for time calculations.
+
+        # GLOBAL USER FILTERS
+
+        self.SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(
+            self.EPOCH
+        )
+        # The rightmost value of the date_range.
+
+        self.SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(
+            self.EPOCH
+        )
+        # The leftmost value of the data_range.
+
+        self.SELECTED_COMPANY_NAMES: reactive.value[list[str]] = reactive.value([""])
+        # The selected value of the company selection dropdown
 
 
-# GLOBAL USER FILTERS
-
-SELECTED_PERIOD_HIGH_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
-# The rightmost value of the date_range.
-
-SELECTED_PERIOD_LOW_BOUND: reactive.value[datetime] = reactive.value(EPOCH)
-# The leftmost value of the data_range.
-
-SELECTED_COMPANY_NAMES: reactive.value[list[str]] = reactive.value([""])
-# The selected value of the company selection dropdown
+APP_CONSTANTS = Constants.get_instance()
 
 
 # UTILS

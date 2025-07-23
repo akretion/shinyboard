@@ -2,23 +2,13 @@ from __future__ import annotations
 from pages.main import _
 import tomllib
 import logging
+import gettext
 
 import polars as pl
 from required_package_utils import install_packages, get_installed_modules
 
 from connect import Connect
-from pages.shared import AVAILABLE_RELS
-from pages.shared import CURRENT_USER_ID
-from pages.shared import CURRENT_USER_NAME
-from pages.shared import FRENCH_NAME
-from pages.shared import MAX_DB_TIME
-from pages.shared import MIN_DB_TIME
-from pages.shared import OTHER_RELS
-from pages.shared import SELECTED_DATAFRAME_NAME
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import TABLE_TIME_COLUMNS
-from pages.shared import SELECTED_COMPANY_NAMES
+from pages.shared import APP_CONSTANTS
 from shiny import App
 from shiny import Inputs
 from shiny import Outputs
@@ -26,6 +16,12 @@ from shiny import reactive
 from shiny import render
 from shiny import Session
 from shiny import ui
+
+fr = gettext.translation(domain="base", localedir="i18n/locales", languages=["fr"])
+
+fr.install()
+
+_ = fr.gettext
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
@@ -98,15 +94,15 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     def credentials_input():
         if is_logged_in.get():
             return ui.div(
-                ui.h3(f"{_('Connected as')} {in_logins.get()['user']}"),
+                ui.h3(f"{in_logins.get()['user']}"),
                 ui.input_action_button("disconnect", _("Disconnect")),
             )
         else:
             return ui.div(
                 ui.input_text(
                     "login",
-                    ui.span("Login"),
-                    placeholder=_("Lower identifier"),
+                    ui.span(_("Login")),
+                    placeholder=_("Lowercase identifier"),
                 ),
                 ui.input_password("password", ui.span(_("Password"))),
                 ui.input_action_button("login_button", _("Log in")),
@@ -171,8 +167,8 @@ AND ir_model.model !~ '.show$'
             "user": input.login(),
             "user_id": uid,
         }
-        CURRENT_USER_NAME.set(input.login())
-        CURRENT_USER_ID.set(uid)
+        APP_CONSTANTS.CURRENT_USER_NAME.set(input.login())
+        APP_CONSTANTS.CURRENT_USER_ID.set(uid)
         in_logins.set(newValue)
         if (
             not LOGINS.select("login")
@@ -192,10 +188,10 @@ AND ir_model.model !~ '.show$'
                     *package_ui_collection.get(),
                     ui.nav_spacer(),
                     ui.nav_menu(
-                        ui.h2("All apps"),
+                        ui.h2(_("All apps")),
                         *other_apps_collection.get(),
                     ),
-                    title="Applications > ",
+                    title="Apps > ",
                 ),
             )
         else:
@@ -219,7 +215,7 @@ AND ir_model.model !~ '.show$'
                 new_dict = {}
                 for name, value in TABLE_TIME.items():
                     new_dict.update({name: value})
-                TABLE_TIME_COLUMNS.set(new_dict)
+                APP_CONSTANTS.TABLE_TIME_COLUMNS.set(new_dict)
             except Exception as EX:
                 logging.log(logging.ERROR, "ERROR : An exception occured (see below)")
                 logging.log(
@@ -299,12 +295,12 @@ AND ir_model.model !~ '.show$'
 
         res_partner = DB.read("""SELECT * FROM res_partner""")
 
-        MIN_DB_TIME.set(
+        APP_CONSTANTS.MIN_DB_TIME.set(
             sale_order_joined.sql(
                 """SELECT MIN(date_order) AS min FROM self""",
             ).to_dict()["min"][0],
         )
-        MAX_DB_TIME.set(
+        APP_CONSTANTS.MAX_DB_TIME.set(
             sale_order_joined.sql(
                 """SELECT MAX(date_order) + interval '1 day' AS max FROM self""",
             ).to_dict()["max"][0],
@@ -351,14 +347,14 @@ AND ir_model.model !~ '.show$'
             FROM product_product
             """
         )
-        OTHER_RELS.set(
+        APP_CONSTANTS.OTHER_RELS.set(
             {
                 "product_product": product_product,
                 "sale_order_line": sale_order_line,
                 "res_company": res_company,
             }
         )
-        AVAILABLE_RELS.set(
+        APP_CONSTANTS.AVAILABLE_RELS.set(
             {
                 "sale_order": sale_order_joined,
                 "purchase_order": purchase_order_joined,
@@ -371,7 +367,7 @@ AND ir_model.model !~ '.show$'
         if is_logged_in.get():
             return ui.input_radio_buttons(
                 "df_radio_buttons",
-                ui.h3(_("Data source")),
+                ui.h4(_("Source")),
                 [name for name in translation.keys()],
             )
 
@@ -379,17 +375,23 @@ AND ir_model.model !~ '.show$'
     def user_filters():
         if is_logged_in.get():
             res_companies = (
-                OTHER_RELS.get()["res_company"].select("name").to_series().to_list()
+                APP_CONSTANTS.OTHER_RELS.get()["res_company"]
+                .select("name")
+                .to_series()
+                .to_list()
             )
 
             if len(res_companies) < 1:
                 return ui.span(
                     ui.input_slider(
                         "date_range",
-                        ui.h4("Sélection de date"),
-                        MIN_DB_TIME.get(),
-                        MAX_DB_TIME.get(),
-                        [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                        ui.h4(_("Date")),
+                        APP_CONSTANTS.MIN_DB_TIME.get(),
+                        APP_CONSTANTS.MAX_DB_TIME.get(),
+                        [
+                            APP_CONSTANTS.MIN_DB_TIME.get(),
+                            APP_CONSTANTS.MAX_DB_TIME.get(),
+                        ],
                         time_format="%Y-%m-%d",
                         drag_range=True,
                     )
@@ -398,16 +400,19 @@ AND ir_model.model !~ '.show$'
                 return ui.span(
                     ui.input_slider(
                         "date_range",
-                        ui.h4("Sélection de date"),
-                        MIN_DB_TIME.get(),
-                        MAX_DB_TIME.get(),
-                        [MIN_DB_TIME.get(), MAX_DB_TIME.get()],
+                        ui.h4(_("Date")),
+                        APP_CONSTANTS.MIN_DB_TIME.get(),
+                        APP_CONSTANTS.MAX_DB_TIME.get(),
+                        [
+                            APP_CONSTANTS.MIN_DB_TIME.get(),
+                            APP_CONSTANTS.MAX_DB_TIME.get(),
+                        ],
                         time_format="%Y-%m-%d",
                         drag_range=True,
                     ),
                     ui.input_selectize(
                         "company_name",
-                        ui.h4("Sélection d'entreprise"),
+                        ui.h4(_("Company")),
                         res_companies,
                         selected=res_companies[0],
                         multiple=True,
@@ -417,20 +422,20 @@ AND ir_model.model !~ '.show$'
     @reactive.effect
     @reactive.event(input.df_radio_buttons)
     def update_df_name_on_input():
-        SELECTED_DATAFRAME_NAME.set(translation[input.df_radio_buttons()])
-        FRENCH_NAME.set(input.df_radio_buttons())
+        APP_CONSTANTS.SELECTED_DATAFRAME_NAME.set(translation[input.df_radio_buttons()])
+        APP_CONSTANTS.FRENCH_NAME.set(input.df_radio_buttons())
 
     @reactive.effect
     @reactive.event(input.date_range)
     def date_range_handler():
         values = input.date_range()
-        SELECTED_PERIOD_LOW_BOUND.set(values[0])
-        SELECTED_PERIOD_HIGH_BOUND.set(values[1])
+        APP_CONSTANTS.SELECTED_PERIOD_LOW_BOUND.set(values[0])
+        APP_CONSTANTS.SELECTED_PERIOD_HIGH_BOUND.set(values[1])
 
     @reactive.effect
     @reactive.event(input.company_name)
     def company_name_handler():
-        SELECTED_COMPANY_NAMES.set(input.company_name())
+        APP_CONSTANTS.SELECTED_COMPANY_NAMES.set(input.company_name())
 
 
 app = App(app_ui, app_server)

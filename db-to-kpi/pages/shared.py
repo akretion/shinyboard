@@ -42,6 +42,20 @@ def available_tables(uid: int, connection: Connect):
 
 
 @dataclass
+class Config:
+    instance = None
+
+    @staticmethod
+    def get_instance():
+        if not Config.instance:
+            Config.instance = Config()
+        return Config.instance
+
+    def __init__(self):
+        self.DB_CONF = SqliteDatabase("odoo_shiny.db")
+
+
+@dataclass
 class Constants:
 
     instance = None
@@ -56,9 +70,6 @@ class Constants:
 
         # CONSTANTS
         self.EPOCH = datetime(1970, 1, 1, 0, 0, 0)
-
-        # ORM DATABASE
-        self.DB_CONF = SqliteDatabase("odoo_shiny.db")
 
         # CREDENTIALS
         self.CURRENT_USER_ID = reactive.value(-1)
@@ -102,6 +113,7 @@ class Constants:
 
 
 APP_CONSTANTS = Constants.get_instance()
+APP_CONFIG = Config.get_instance()
 
 
 # UTILS

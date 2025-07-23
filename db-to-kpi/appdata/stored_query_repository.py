@@ -1,11 +1,11 @@
 from .stored_query_model import StoredQuery
 from .simple_repository import SimpleRepository
-from pages.shared import DB_CONF
+from pages.shared import APP_CONFIG
 
 
 class StoredQueryRepository(SimpleRepository):
     def __init__(self):
-        DB_CONF.create_tables([StoredQuery])
+        APP_CONFIG.DB_CONF.create_tables([StoredQuery])
 
     def get_prog_instance(self):
         return StoredQuery()

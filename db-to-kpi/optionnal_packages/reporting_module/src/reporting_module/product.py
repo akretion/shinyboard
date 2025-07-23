@@ -5,12 +5,7 @@ import plotly.graph_objects as go
 import polars as pl
 from plotly.graph_objects import Figure
 from plotly.graph_objects import FigureWidget
-from pages.shared import AVAILABLE_RELS
-from pages.shared import OTHER_RELS
-from pages.shared import SELECTED_PERIOD_HIGH_BOUND
-from pages.shared import SELECTED_PERIOD_LOW_BOUND
-from pages.shared import SELECTED_COMPANY_NAMES
-from pages.shared import TABLE_TIME_COLUMNS
+from pages.shared import APP_CONSTANTS
 from great_tables import GT
 from shiny import Inputs
 from shiny import module
@@ -78,22 +73,24 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
     selected_graph_type_product_plot: reactive.value[str] = reactive.value("bar")
 
     def get_product_product():
-        return OTHER_RELS.get()["product_product"]
+        return APP_CONSTANTS.OTHER_RELS.get()["product_product"]
 
     @reactive.calc
     def get_sale_order_line_filtered():
         return (
-            OTHER_RELS.get()["sale_order_line"]
+            APP_CONSTANTS.OTHER_RELS.get()["sale_order_line"]
             .join_where(
-                AVAILABLE_RELS.get()["sale_order"],
+                APP_CONSTANTS.AVAILABLE_RELS.get()["sale_order"],
                 pl.col("order_id") == pl.col("id_right"),
             )
             .filter(
-                pl.col(f"{TABLE_TIME_COLUMNS.get()['sale_order']}").is_between(
-                    SELECTED_PERIOD_LOW_BOUND.get(),
-                    SELECTED_PERIOD_HIGH_BOUND.get(),
+                pl.col(
+                    f"{APP_CONSTANTS.TABLE_TIME_COLUMNS.get()['sale_order']}"
+                ).is_between(
+                    APP_CONSTANTS.SELECTED_PERIOD_LOW_BOUND.get(),
+                    APP_CONSTANTS.SELECTED_PERIOD_HIGH_BOUND.get(),
                 ),
-                pl.col("company").is_in(SELECTED_COMPANY_NAMES.get()),
+                pl.col("company").is_in(APP_CONSTANTS.SELECTED_COMPANY_NAMES.get()),
             )
         )
 

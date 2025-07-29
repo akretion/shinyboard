@@ -21,11 +21,11 @@ import logging
 @module.ui
 def salespersons_ui():
     return ui.page_fluid(
-        ui.h3("Revenus par vendeurs"),
+        ui.h5("Revenus par vendeurs"),
         ui.hr(),
         output_widget("display_salespersons_plot"),
         
-        ui.h3(ui.output_text("display_sales_plot_text")),
+        ui.h5(ui.output_text("display_sales_plot_text")),
         ui.hr(),
         ui.output_ui("display_sales_inputs"),
         ui.output_ui("display_sales_plot_ui"),
@@ -33,12 +33,12 @@ def salespersons_ui():
         ui.row(
             ui.column(
                 6,
-                ui.h3("Nombre de ventes par clients"),
+                ui.h5("Nombre de ventes par clients"),
                 ui.output_ui("display_client_sales_df"),
             ),
             ui.column(
                 6,
-                ui.h3("Revenus par clients"),
+                ui.h5("Revenus par clients"),
                 ui.output_ui("display_client_revenue_df"),
             ),
         ),

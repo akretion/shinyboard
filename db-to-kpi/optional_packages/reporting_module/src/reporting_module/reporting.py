@@ -7,7 +7,7 @@ from . import product
 @module.ui
 def reporting_ui():
     return ui.nav_panel(
-        ui.tooltip(ui.h2("KPI"), "Key Performance Indicators", placement="bottom"),
+        ui.tooltip(ui.h4("KPI"), "Key Performance Indicators", placement="bottom"),
         ui.navset_pill(
             ui.nav_panel("Vendeurs", salespersons.salespersons_ui("salespersons")),
             ui.nav_panel("Produits", product.product_ui("products")),

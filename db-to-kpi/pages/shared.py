@@ -6,6 +6,7 @@ should be shared across files.
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 
 from dataclasses import dataclass
 import polars as pl
@@ -37,9 +38,21 @@ def available_tables(uid: int, connection: Connect):
     table_name_schema_dict = {}
     print(table_name_schema_dict)
 
+# APP DATA
+@dataclass
+class Styles:
+    instance = None
+
+    @staticmethod
+    def get_instance():
+        if not Styles.instance:
+            Styles.instance = Styles()
+        return Styles.instance
+    
+    def __init__(self):
+        self.styles_dir_path = Path("styles/")
 
 # DATAFRAME DATA
-
 
 @dataclass
 class Config:

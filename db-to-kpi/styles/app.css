@@ -1,0 +1,51 @@
+
+:root {
+    --primary-color:hsl(254, 23%, 50%); /*for navbars and other ui elements main BG colors*/
+    --secondary-color: hsl(254, 23%, 70%); /*for ui hovers*/
+    --ternary-color: hsl(254, 23%, 98%); /*for backgrounds*/
+}
+
+/*removing inaesthetic white spaces from the UI*/
+div.main {
+    background-color: var(--ternary-color) !important;
+    padding-top: 0px !important;
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+
+/*top nav in home page*/
+[class="navbar navbar-expand-md navbar-default"], 
+[class="navbar navbar-expand-md navbar-default"] h4 {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.dropdown-menu {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+} 
+
+.dropdown-menu>h4:hover {
+    background-color: var(--secondary-color) !important;
+}
+
+/* --removing underlines from headers */
+[class="nav navbar-nav nav-underline"] {
+    color: white !important;
+}
+
+/* navpills */
+a.nav-link {
+    color: black !important;
+}
+
+a.nav-link.active{
+    border-bottom-color: white !important;
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+a.nav-link.active:hover {
+    background-color: var(--secondary-color) !important;
+}
+

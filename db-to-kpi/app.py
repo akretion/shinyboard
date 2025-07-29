@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pages.main import _
+
 import tomllib
 import logging
 import gettext
@@ -8,7 +9,7 @@ import polars as pl
 from required_package_utils import install_packages, get_installed_modules
 
 from connect import Connect
-from pages.shared import APP_CONSTANTS
+from pages.shared import APP_CONSTANTS, Styles
 from shiny import App
 from shiny import Inputs
 from shiny import Outputs
@@ -23,6 +24,8 @@ fr.install()
 
 _ = fr.gettext
 
+app_css = Styles.get_instance().styles_dir_path / "app.css"
+
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.output_ui("credentials_input"),
@@ -30,6 +33,7 @@ app_ui = ui.page_sidebar(
         ui.output_ui("get_avail_df_name_list"),
         ui.output_ui("user_filters"),
     ),
+    ui.include_css(app_css),
     ui.output_ui("login_handler"),
 )
 

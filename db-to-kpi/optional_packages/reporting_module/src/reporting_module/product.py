@@ -25,13 +25,13 @@ from shinywidgets import render_plotly
 @module.ui
 def product_ui():
     return ui.page_fluid(
-        ui.h2("Catégorie la plus populaire"),
+        ui.h4("Catégorie la plus populaire"),
         ui.hr(),
         ui.row(
             ui.column(
                 7,
                 ui.card(
-                    ui.card_header(ui.h3("par revenu")),
+                    ui.card_header(ui.h5("par revenu")),
                     ui.card_body(
                         ui.output_ui(
                             "display_trending_category_revenue",
@@ -42,7 +42,7 @@ def product_ui():
             ui.column(
                 5,
                 ui.card(
-                    ui.card_header(ui.h3("par unités vendues")),
+                    ui.card_header(ui.h5("par unités vendues")),
                     ui.card_body(
                         ui.output_ui(
                             "display_trending_category_units_sold",
@@ -51,14 +51,14 @@ def product_ui():
                 ),
             ),
         ),
-        ui.h2("Ventes de produits"),
+        ui.h4("Ventes de produits"),
         ui.hr(),
-        ui.h3("par revenus générés"),
+        ui.h5("par revenus générés"),
         ui.output_ui("display_product_plot_inputs"),
         ui.output_ui("display_product_plot_ui"),
         ui.output_ui("redirect_script"),
         ui.output_ui("product_plot_widget"),
-        ui.h3("par unités vendues"),
+        ui.h5("par unités vendues"),
         ui.output_ui("display_best_sellers_qty_ui"),
     )
 

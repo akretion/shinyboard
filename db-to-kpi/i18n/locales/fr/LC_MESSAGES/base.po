@@ -92,3 +92,7 @@ msgstr "Société"
 #: sql_query_input.py:31
 msgid "SQL Query"
 msgstr "Requête SQL"
+
+#: product.py:210
+msgid "Graph type"
+msgstr "Type de graphe"

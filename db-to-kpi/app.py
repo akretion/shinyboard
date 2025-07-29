@@ -170,6 +170,7 @@ AND ir_model.model !~ '.show$'
         APP_CONSTANTS.CURRENT_USER_NAME.set(input.login())
         APP_CONSTANTS.CURRENT_USER_ID.set(uid)
         in_logins.set(newValue)
+        
         if (
             not LOGINS.select("login")
             .filter(pl.col("login") == str(input.login()).strip())
@@ -188,10 +189,10 @@ AND ir_model.model !~ '.show$'
                     *package_ui_collection.get(),
                     ui.nav_spacer(),
                     ui.nav_menu(
-                        ui.h2(_("All apps")),
+                        ui.h2(_("Apps")),
                         *other_apps_collection.get(),
                     ),
-                    title="Apps > ",
+                    title="",
                 ),
             )
         else:

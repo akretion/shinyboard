@@ -1,13 +1,20 @@
 [APP_CONFIG]
 
+[APP_CONFIG.install]
+method="manual"
+# possible values: "auto" | "manual"
+
+[APP_CONFIG.theme]
+theme="default"
+
+[APP_CONFIG.layout]
 # To the front of the UI
-[APP_CONFIG.highlighted]
+[APP_CONFIG.layout.highlighted]
 modules=[
     "reporting_module"
 ]
-
 # Hidden in a menu
-[APP_CONFIG.hidden]
+[APP_CONFIG.layout.hidden]
 modules=[
     "chat",
     "generate_charts"
@@ -17,8 +24,8 @@ modules=[
 [TABLE_TIMES]
 # Vente
 sale_order="date_order"
-# valeurs possibles: date_order | sale_order_create_date | sale_order_write_date
+# possibles values: "date_order" | "sale_order_create_date" | "sale_order_write_date"
 
 # Achat
 purchase_order="date_order"
-# valeurs possibles: date_order | purchase_order_create_date | purchase_order_write_date
+# possible values: "date_order" | "purchase_order_create_date" | "purchase_order_write_date"

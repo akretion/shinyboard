@@ -15,7 +15,6 @@ downloads/
 eggs/
 .eggs/
 lib/
-lib64/
 parts/
 sdist/
 var/
@@ -202,7 +201,6 @@ bin/
 etc/jupyter/nbconfig/notebook.d
 include/
 share/
-lib64/
 # Byte-compiled / optimized / DLL files
 *.py[cod]
 *$py.class
@@ -219,7 +217,6 @@ downloads/
 eggs/
 .eggs/
 lib/
-lib64/
 parts/
 sdist/
 var/
@@ -402,11 +399,12 @@ cython_debug/
 odoo_shiny.db
 basic-app/
 basic-navigation/
+first-dashboard/
 bin/
 etc/jupyter/nbconfig/notebook.d
 include/
 share/
-lib64/
+lib64
 pyvenv.cfg
 **/__pycache__/**
 # custom local file

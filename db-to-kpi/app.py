@@ -174,7 +174,7 @@ AND ir_model.model !~ '.show$'
         APP_CONSTANTS.CURRENT_USER_NAME.set(input.login())
         APP_CONSTANTS.CURRENT_USER_ID.set(uid)
         in_logins.set(newValue)
-        
+
         if (
             not LOGINS.select("login")
             .filter(pl.col("login") == str(input.login()).strip())

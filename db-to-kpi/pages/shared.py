@@ -38,6 +38,7 @@ def available_tables(uid: int, connection: Connect):
     table_name_schema_dict = {}
     print(table_name_schema_dict)
 
+
 # APP DATA
 @dataclass
 class Styles:
@@ -48,11 +49,13 @@ class Styles:
         if not Styles.instance:
             Styles.instance = Styles()
         return Styles.instance
-    
+
     def __init__(self):
         self.styles_dir_path = Path("styles/")
 
+
 # DATAFRAME DATA
+
 
 @dataclass
 class Config:

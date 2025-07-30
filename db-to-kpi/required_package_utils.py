@@ -18,44 +18,46 @@ with open("config.toml", "rb") as CONFIG:
         - add checks on module names to see whether these are within optional_packages
         (if an ill-intentionned user puts a wrong library in the TOML, the code will install the package directly in
         the project...)
-        """       
+        """
         method = parsed["APP_CONFIG"]["install"]["method"]
         print(f"method is equal to {method}")
-        if method == "auto":    
+        if method == "auto":
             installed_all = True
             total_requested = 3
             installed = 0
             install = True
-            
-            log(
-                "INPUT", 
-                "Do you wish to reinstall all modules (y/n) ?"
-            )
+
+            log("INPUT", "Do you wish to reinstall all modules (y/n) ?")
             res = input("> ")
             match res.lower():
-                case 'y' | 'yes':  
+                case "y" | "yes":
                     print()
-                case 'n' | 'no':
+                case "n" | "no":
                     install = False
                     log(
                         "INFO",
-                        "✔  As you wish ! Old installations will be used for this session."
+                        "✔  As you wish ! Old installations will be used for this session.",
                     )
             if install:
                 for category in parsed["APP_CONFIG"]["layout"].keys():
-                    for pckg in parsed["APP_CONFIG"]["layout"][f"{category}"]["modules"]:
-                        try:                 
+                    for pckg in parsed["APP_CONFIG"]["layout"][f"{category}"][
+                        "modules"
+                    ]:
+                        try:
                             subprocess.run(
                                 args=["pip", "install", f"./optional_packages/{pckg}"],
                                 capture_output=True,
                                 check=True,
                             )
                             installed += 1
-                            log("INFO", f"{GREEN}+{WHITE} {pckg} Successfully installed.")
-                        
+                            log(
+                                "INFO",
+                                f"{GREEN}+{WHITE} {pckg} Successfully installed.",
+                            )
+
                         except Exception:
                             log("ERROR", f"{RED}+{WHITE}  Installing {pckg} failed")
-                            
+
                 if installed_all:
                     log(
                         "INFO",
@@ -66,7 +68,10 @@ with open("config.toml", "rb") as CONFIG:
                         "INFO",
                         f"✔  Successfully installed {installed} requested packages (out of {total_requested})",
                     )
-                    log("WARN", f"❌  Failed {total_requested - installed} installations.")
+                    log(
+                        "WARN",
+                        f"❌  Failed {total_requested - installed} installations.",
+                    )
 
     def get_installed_modules() -> dict[str, list]:
         main_modules = []

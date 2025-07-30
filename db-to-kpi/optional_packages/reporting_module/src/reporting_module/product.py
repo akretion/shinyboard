@@ -122,7 +122,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
                 return px.area(
                     data_frame=df, x="name", y="product_uom_qty", width=1200, height=800
                 )
-            case _: 
+            case _:
                 return px.bar(
                     data_frame=df, x="name", y="product_uom_qty", width=1200, height=800
                 )
@@ -202,15 +202,11 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
                 fig.data[0].on_click(handle_pie_click)  # type: ignore
                 return fig
 
-
     @render.ui
     def display_product_plot_inputs():
         return ui.input_select(
-            'graph_type_product_plot',
-            _('Graph type'),
-            ['pie', 'dataframe', 'bar']
+            "graph_type_product_plot", _("Graph type"), ["pie", "dataframe", "bar"]
         )
-        
 
     @render.ui
     def display_product_plot_ui():
@@ -220,8 +216,7 @@ def product_server(inputs: Inputs, outputs: Outputs, session: Session):
             )
         else:
             return ui.row(
-                ui.output_ui("display_product_plot_input"), 
-                GT(get_product_plot_df())
+                ui.output_ui("display_product_plot_input"), GT(get_product_plot_df())
             )
 
     @reactive.effect

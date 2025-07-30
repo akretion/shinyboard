@@ -14,7 +14,7 @@ div.main {
 }
 
 /*top nav in home page*/
-[class="navbar navbar-expand-md navbar-default"], 
+[class="navbar navbar-expand-md navbar-default"],
 [class="navbar navbar-expand-md navbar-default"] h4 {
     background-color: var(--primary-color) !important;
     color: white !important;
@@ -23,7 +23,7 @@ div.main {
 .dropdown-menu {
     background-color: var(--primary-color) !important;
     color: white !important;
-} 
+}
 
 .dropdown-menu>h4:hover {
     background-color: var(--secondary-color) !important;
@@ -47,5 +47,51 @@ a.nav-link.active{
 
 a.nav-link.active:hover {
     background-color: var(--secondary-color) !important;
+    color: black !important;
 }
 
+/* --making the nav less high overall */
+
+.navbar {
+    --bs-navbar-padding-x: 0px !important;
+    padding: 0px !important;
+}
+
+.nav-item {
+    padding: 0px !important;
+    margin: 0px !important;
+    --bs-navbar-padding-y: 0px !important;
+}
+
+.container-fluid {
+    --bs-navbar-padding-y: 0px !important;
+}
+
+
+/* applying more colors */
+[class = "btn btn-default action-button shiny-bound-input"] {
+    background-color: var(--primary-color) !important;
+    color: white;
+}
+
+[class = "btn btn-default action-button shiny-bound-input"]:hover {
+    background-color: var(--secondary-color) !important;
+}
+
+.shiny-input-container .radio input:checked {
+    background-color: var(--primary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.irs-bar, .irs-handle, .irs-from, .irs-to, .irs-single {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.container-fluid h2 {
+    color: white !important;
+}
+
+.dropdown-item:hover {
+    color: black !important;
+}

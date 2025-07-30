@@ -24,12 +24,10 @@ def salespersons_ui():
         ui.h5("Revenus par vendeurs"),
         ui.hr(),
         output_widget("display_salespersons_plot"),
-        
         ui.h5(ui.output_text("display_sales_plot_text")),
         ui.hr(),
         ui.output_ui("display_sales_inputs"),
         ui.output_ui("display_sales_plot_ui"),
-        
         ui.row(
             ui.column(
                 6,
@@ -47,13 +45,13 @@ def salespersons_ui():
 
 @module.server
 def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
-    
+
     graph_types: dict[str, reactive.value[str]] = {
-        "salespersons_plot" : reactive.value("bar"),
-        "sales_plot" : reactive.value("area"),
+        "salespersons_plot": reactive.value("bar"),
+        "sales_plot": reactive.value("area"),
     }
 
-#### DATA
+    #### DATA
     @reactive.calc
     def get_sale_order_filtered():
         return APP_CONSTANTS.AVAILABLE_RELS.get()["sale_order"].filter(
@@ -73,7 +71,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
             pl.col("company").is_in(APP_CONSTANTS.SELECTED_COMPANY_NAMES.get()),
         )
 
-#### SALESPERSONS
+    #### SALESPERSONS
     def get_salespersons_plot():
         sale_order = get_sale_order_filtered()
 
@@ -100,7 +98,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
     def display_salespersons_plot():
         return get_salespersons_plot()
 
-#### SALES
+    #### SALES
     @reactive.calc
     def get_sales_data() -> pl.DataFrame:
         """
@@ -119,12 +117,12 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
         )
 
         return data
-    
+
     @reactive.calc
     def get_sales_pivot():
         """
         ## Summary
-            Returns a Pivot that describes a summarized version of get_sales_data() 
+            Returns a Pivot that describes a summarized version of get_sales_data()
 
         ## Returns:
             type_ polars.DataFrame: DataFrame that describes the data
@@ -133,15 +131,12 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
         return (
             sale_order.select("date_order", "sale_order", "company")
             .group_by("date_order")
-            .agg(pl.count("sale_order"), pl.col('company').agg_groups())
+            .agg(pl.count("sale_order"), pl.col("company").agg_groups())
             .sort(by="date_order", descending=False)
-            .pivot(
-                on="date_order",
-                values="sale_order",
-                index="company"
-            )
+            .pivot(on="date_order", values="sale_order", index="company")
         )
-######## RENDITIONS AND RENDERING
+
+    ######## RENDITIONS AND RENDERING
     def get_gt_sales_pivot():
         """
         ## Summary
@@ -151,7 +146,7 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
             type_ great_tables.GT: GreatTable object
         """
         return GT(get_sales_pivot())
-    
+
     @render_plotly
     def display_sales_plotly():
         """
@@ -160,62 +155,53 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
         Returns:
             plotly.go.Figure: Figure object
         """
-        data = get_sales_data() 
+        data = get_sales_data()
         renaming = {
             "sale_order": "nombre de ventes",
             "date_order": "date de vente",
         }
-        col_names = {
-            "x": "date de vente",
-            "y": "nombre de ventes"
-        }
-        
+        col_names = {"x": "date de vente", "y": "nombre de ventes"}
+
         match graph_types["sales_plot"].get():
-            case 'area':
+            case "area":
                 fig = px.area(
                     data_frame=data.cast(
                         {
                             "date_order": pl.String,
                         }
-                    ).rename(
-                        renaming
-                    ),
+                    ).rename(renaming),
                     x=col_names["x"],
                     y=col_names["y"],
                 )
-                
+
                 return fig
-            
-            case 'pie':
+
+            case "pie":
                 fig = px.pie(
                     data_frame=data.cast(
                         {
                             "date_order": pl.String,
                         }
-                    ).rename(
-                        renaming
-                    ),
+                    ).rename(renaming),
                     names=col_names["y"],
-                    values=col_names["y"]
+                    values=col_names["y"],
                 )
-                
+
                 return fig
-                
-            case 'bar':
+
+            case "bar":
                 fig = px.bar(
                     data_frame=data.cast(
                         {
                             "date_order": pl.String,
                         }
-                    ).rename(
-                        renaming
-                    ),
+                    ).rename(renaming),
                     x=col_names["y"],
-                    y=col_names["y"]
+                    y=col_names["y"],
                 )
-                
+
                 return fig
-            
+
             case _:
                 fig = px.line(
                     data_frame=data.cast(
@@ -231,20 +217,19 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
                     x="date de vente",
                     y="nombre de ventes",
                 )
-                
+
                 return fig
-    
+
     @render.ui
     def display_sales_plot_ui():
         match graph_types["sales_plot"].get():
-            case 'dataframe':
+            case "dataframe":
                 return get_gt_sales_pivot()
-                
-            case _:
-                return output_widget('display_sales_plotly')
 
-    
-######## INPUTS    
+            case _:
+                return output_widget("display_sales_plotly")
+
+    ######## INPUTS
     @render.ui
     def display_sales_inputs():
         """
@@ -256,22 +241,22 @@ def salespersons_server(inputs: Inputs, outputs: Outputs, session: Session):
             type_ shiny.ui.Tag: UI that allows selection
         """
         return ui.input_select(
-            'graph_types_sales_inputs',
-            _('Type de graphe'),
-            ['bar', 'line', 'pie', 'dataframe']
+            "graph_types_sales_inputs",
+            _("Type de graphe"),
+            ["bar", "line", "pie", "dataframe"],
         )
-    
+
     @reactive.effect
     @reactive.event(inputs.graph_types_sales_inputs)
     def sales_inputs_handler():
         new_value = inputs.graph_types_sales_inputs()
         graph_types["sales_plot"].set(new_value)
-                
+
     @render.text
     def display_sales_plot_text():
         return f"Ventes (du {APP_CONSTANTS.SELECTED_PERIOD_LOW_BOUND.get()} au {APP_CONSTANTS.SELECTED_PERIOD_HIGH_BOUND.get()})"
 
-#### 2 DATAFRAMES
+    #### 2 DATAFRAMES
     @reactive.calc
     def get_client_df():
         sale_order_line = get_sale_order_line_filtered()

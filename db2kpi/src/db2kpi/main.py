@@ -14,11 +14,13 @@ _ = gettext.gettext
 @dataclass
 class Instance:
     models: list
+    name: str
 
 
 def main():
     data = loader.load()
-    inst = Instance(models=data["data_source"]["models"])
+    source = data["data_source"]
+    inst = Instance(name=source["name"], models=source["models"])
     return inst
 
 

@@ -410,3 +410,5 @@ pyvenv.cfg
 # custom local file
 perso.txt
 .env
+
+/shiny-custom/src/shiny_custom/data/dsn.toml

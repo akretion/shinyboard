@@ -18,14 +18,19 @@ def get_override_package():
 
 
 def get_custom_settings(override_package):
-    config_file_path = files(override_package.replace("-", "_")) / "data/config.toml"
-    try:
-        with config_file_path.open("rb") as f:
-            data = tomllib.load(f)
-    except FileNotFoundError:
-        logger.warning(f"Unfound '{config_file_path}' file.")
-    check_custom_settings(data)
-    return data
+    def get_config_data(file):
+        file_path = files(override_package.replace("-", "_")) / f"data/{file}.toml"
+        try:
+            with file_path.open("rb") as f:
+                data = tomllib.load(f)
+        except FileNotFoundError:
+            logger.warning(f"Unfound '{file_path}.toml' file.")
+        return data
+
+    main_settings = get_config_data("config")
+    check_custom_settings(main_settings)
+    dsn = get_config_data("dsn")
+    return main_settings
 
 
 def check_custom_settings(data):
@@ -37,6 +42,7 @@ def check_custom_settings(data):
         messages = ["Missing 'data_source' in config file."]
     if name == "odoo":
         """"""
+        # TODO manage case where this is not Odoo
     else:
         messages.append("Missing 'name' in 'data_source' section in config file")
     if messages:

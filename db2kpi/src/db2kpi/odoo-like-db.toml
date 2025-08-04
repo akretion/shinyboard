@@ -1,0 +1,5 @@
+# This file give info on generic structure of Odoo-like databases.
+# Odoo like db are Odoo, or some forks
+[default_date]
+sale_order="date_order"
+purchase_order="date_order"

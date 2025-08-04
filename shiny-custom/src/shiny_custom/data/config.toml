@@ -1,0 +1,3 @@
+[data_source]
+name = "odoo"
+models = ["sale.order", "purchase.order"]

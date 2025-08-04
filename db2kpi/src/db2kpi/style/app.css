@@ -1,0 +1,97 @@
+:root {
+    --primary-color: hsl(254, 23%, 50%); /*for navbars and other ui elements main BG colors*/
+    --secondary-color: hsl(254, 23%, 70%); /*for ui hovers*/
+    --ternary-color: hsl(254, 23%, 98%); /*for backgrounds*/
+}
+
+/*removing inaesthetic white spaces from the UI*/
+div.main {
+    background-color: var(--ternary-color) !important;
+    padding-top: 0px !important;
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+
+/*top nav in home page*/
+.card-header,
+[class="card-header navbar navbar-expand-md navbar-default"],
+[class="navbar navbar-expand-md navbar-default"] h4 {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.dropdown-menu {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.dropdown-menu>h4:hover {
+    background-color: var(--secondary-color) !important;
+}
+
+/* --removing underlines from headers */
+[class="nav navbar-nav nav-underline"] {
+    color: white !important;
+}
+
+/* navpills */
+a.nav-link {
+    color: black !important;
+}
+
+a.nav-link.active{
+    border-bottom-color: white !important;
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+a.nav-link.active:hover {
+    background-color: var(--secondary-color) !important;
+    color: black !important;
+}
+
+/* --making the nav less high overall */
+
+.navbar {
+    --bs-navbar-padding-x: 0px !important;
+    padding: 0px !important;
+}
+
+.nav-item {
+    padding: 0px !important;
+    margin: 0px !important;
+    --bs-navbar-padding-y: 0px !important;
+}
+
+.container-fluid {
+    --bs-navbar-padding-y: 0px !important;
+}
+
+
+/* applying more colors */
+[class = "btn btn-default action-button shiny-bound-input"] {
+    background-color: var(--primary-color) !important;
+    color: white;
+}
+
+[class = "btn btn-default action-button shiny-bound-input"]:hover {
+    background-color: var(--secondary-color) !important;
+}
+
+.shiny-input-container .radio input:checked {
+    background-color: var(--primary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.irs-bar, .irs-handle, .irs-from, .irs-to, .irs-single {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.container-fluid h2 {
+    color: white !important;
+}
+
+.dropdown-item:hover {
+    color: black !important;
+}

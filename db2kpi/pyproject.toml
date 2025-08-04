@@ -1,0 +1,31 @@
+[project]
+name = "db2kpi"
+version = "0.1.0"
+description = "Extract data from database to create KPI dashboards"
+readme = "README.md"
+authors = [
+    { name = "David BEAL", email = "david.beal@akretion.com" },
+]
+requires-python = ">=3.13"
+dependencies = [
+    "dotenv",
+    "faicons",
+    # "great_tables",
+    # "peewee",
+    "plotly",
+    "polars",
+    "psycopg2",
+    "seaborn",
+    "shiny",
+    "shinywidgets",
+    "pyarrow",
+    "connectorx",
+    # "sqlglot",
+]
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

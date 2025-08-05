@@ -19,6 +19,7 @@ app_ui = ui.page_fillable(
             ui.sidebar(
                 "Settings",
                 ui.output_ui("get_data_source"),
+                ui.output_ui("debug"),
                 bg="#f8f8f8",
             ),
             "Content",
@@ -38,6 +39,11 @@ def app_server(input: Inputs, output: Outputs, session: Session):
             ui.div(ui.span(_("Sources"))),
             instance.models,
         )
+
+    @render.ui
+    def debug():
+        dbg = [instance.kind.__str__()]
+        return ui.span("debug:"), ui.pre("\n- ".join(dbg))
 
 
 app = App(app_ui, app_server)

@@ -3,3 +3,6 @@
 [default_date]
 sale_order="date_order"
 purchase_order="date_order"
+
+[misc]
+ignored_logins=["default", "public", "portaltemplate", "portal", "__system__"]

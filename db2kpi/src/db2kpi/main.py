@@ -29,7 +29,9 @@ class Instance:
 
     def plug_app(self, data):
         if self.name == "odoo":
-            self.kind = get_type(self.name)(conn=self.conn, data=data.get("odoo"))
+            self.kind = get_kind_object(self.name)(
+                conn=self.conn, data=data.get("odoo")
+            )
 
 
 def main():
@@ -43,8 +45,8 @@ def main():
     return inst
 
 
-def get_type(type_):
-    match type_:
+def get_kind_object(kind):
+    match kind:
         case "odoo":
             return Odoo
         # case "sage100":
@@ -52,7 +54,7 @@ def get_type(type_):
         # case "business_central":
         #     return BusinessCentral
         case _:
-            raise ValueError(f"Unsupported type: {type_}")
+            raise ValueError(f"Unsupported type: {kind}")
 
 
 instance = main()

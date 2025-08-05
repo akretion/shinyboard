@@ -1,4 +1,4 @@
 # Copy paste this file as dsn.toml in the same directory of your own package
-[query_dsn]
+[dsn]
 main = "postgresql://myuser:1234@localhost:5432/mydb"
 dsn_all = []

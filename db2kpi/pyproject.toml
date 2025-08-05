@@ -13,7 +13,7 @@ dependencies = [
     # "peewee",
     "plotly",
     "polars",
-    "psycopg2",
+    "psycopg3",
     "seaborn",
     "shiny",
     "shinywidgets",

@@ -21,8 +21,10 @@ class DbConnect:
             raise (e)
         self.conn = dsn
 
-    def read_pl(self, query: str) -> pl.DataFrame:
-        return cx.read_sql(conn=self.conn, return_type="polars", query=query)
-
-    def read_sql(self, query: str):
-        return cx.read_sql(conn=self.conn, query=query)
+    def read(self, query: str, out: str = None) -> pl.DataFrame:
+        output = cx.read_sql(conn=self.conn, query=query, return_type="polars")
+        if output.is_empty():
+            logger.info("No data returned for query: %s", query)
+        if out == "list":
+            return output.to_dicts()
+        return output

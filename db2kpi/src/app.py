@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime, timedelta
 from db2kpi.tool import _
 from db2kpi.main import instance
 from db2kpi.element import elements as elm
@@ -16,8 +17,9 @@ app_ui = ui.page_fillable(
         ui.layout_sidebar(
             ui.sidebar(
                 "Settings",
-                ui.output_ui("data_source"),
-                ui.output_ui("organizations"),
+                ui.output_ui("_data_source"),
+                ui.output_ui("_organizations"),
+                ui.output_ui("_date_range"),
                 # ui.output_ui("debug"),
                 bg="#f8f8f8",
             ),
@@ -31,7 +33,7 @@ app_ui = ui.page_fillable(
 def app_server(input: Inputs, output: Outputs, session: Session):
 
     @render.ui
-    def data_source():
+    def _data_source():
         return ui.input_radio_buttons(
             "df_radio_buttons",
             ui.div(ui.span(_("Sources"))),
@@ -39,7 +41,32 @@ def app_server(input: Inputs, output: Outputs, session: Session):
         )
 
     @render.ui
-    def organizations():
+    def _date_range():
+        # TODO BUG: manage first day of the year
+        elm.min_date.set(
+            datetime.strptime(f"{datetime.today().year}-01-01", "%Y-%m-%d")
+        )
+        elm.max_date.set(datetime.today())
+        return ui.input_slider(
+            "date_range",
+            ui.span(_("Dates")),
+            elm.min_date.get(),
+            elm.max_date.get(),
+            [elm.min_date.get(), elm.max_date.get()],
+            # TODO manage localization
+            time_format="%d/%m/%y",
+            drag_range=True,
+        )
+
+    @reactive.effect
+    @reactive.event(input.date_range)
+    def date_range_handler():
+        values = input.date_range()
+        elm.selected_min_date.set(values[0])
+        elm.selected_max_date.set(values[1])
+
+    @render.ui
+    def _organizations():
         orgas = [x["name"] for x in instance.kind.get_organizations()]
         return (
             ui.input_selectize(
@@ -62,7 +89,7 @@ def app_server(input: Inputs, output: Outputs, session: Session):
             instance.kind.get_organizations().__str__(),
             instance.kind.__str__(),
         ]
-        return ui.span("debug:"), ui.pre("\n- ".join(dbg))
+        return ui.span("debug"), ui.pre("\n- ".join(dbg))
 
 
 app = App(app_ui, app_server)

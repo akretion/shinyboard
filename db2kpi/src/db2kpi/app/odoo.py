@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 from db2kpi import db_connect
 from db2kpi.tool import _
+from db2kpi.app.app import App
 
 
 @dataclass
-class Odoo:
+class Odoo(App):
     name: str = "odoo"
     data: dict = False
     conn: db_connect.DbConnect = False

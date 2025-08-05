@@ -5,7 +5,7 @@ TODO
 
 from dataclasses import dataclass
 from db2kpi import config, db_connect
-from db2kpi.odoo import Odoo
+from db2kpi.app.odoo import Odoo
 from db2kpi.tool import _
 
 

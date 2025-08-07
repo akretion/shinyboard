@@ -2,24 +2,33 @@
 It is an abstract class that defines the basic methods
 """
 
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from db2kpi import db_connect
+from db2kpi.db_connect import DbConnect
 from db2kpi.tool import _
 
 
-@dataclass
 class App(ABC):
-    name: str = None
-    # instance of the class which created App object
-    instance: object = None
-    data: dict = None
-    conn: db_connect.DbConnect = None
-    logins: dict = None
 
-    @abstractmethod
-    def get_logins(self):
-        pass
+    name: str = None
+    data: dict = None
+    conn: DbConnect = None
+    logins: dict = None
+    dsn: str = None
+    # List of models or table to be used
+    domain: list
+
+    def __init__(self, data):
+        self.name = data["data_source"]["name"]
+        self.dsn = data["dsn"]["main"]
+        self.data = data
+        self.domain = data["domain"].keys()
+
+    def connect(self):
+        if not self.conn:
+            conn = DbConnect(self.dsn)
+            if conn:
+                self.conn = conn
+        return self.conn
 
     @abstractmethod
     def get_organizations(self):

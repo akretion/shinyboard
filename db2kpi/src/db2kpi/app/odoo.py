@@ -1,16 +1,13 @@
-from dataclasses import dataclass
 import polars as pl
 from db2kpi.tool import _
 from db2kpi.app.app import App
 
 
-@dataclass
 class Odoo(App):
-    name: str = "odoo"
 
     def get_logins(self):
-        ignored = tuple(self.data.get("misc").get("ignored_logins"))
-        query = f"SELECT id, login FROM res_users WHERE login NOT IN {ignored}"
+        ignored = self.data.get("odoo").get("misc").get("ignored_logins")
+        query = f"SELECT id, login FROM res_users WHERE login NOT IN {tuple(ignored)}"
         self.logins = self.conn.read(query)
 
     def get_organizations(self):

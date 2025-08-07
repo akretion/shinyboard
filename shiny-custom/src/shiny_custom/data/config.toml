@@ -9,7 +9,6 @@ leads = {model="crm.lead"}
 Ventes = ["sales", "sale_products"]
 Achats = ["purchase_products"]
 Crm = ["leads"]
-Toto = "a"
 [layout]
 [layout.Ventes]
 "Cmd de Ventes"={output="gt", src="df.sales", fields=["name", "id"]}

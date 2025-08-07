@@ -73,7 +73,7 @@ def app_server(input: Inputs, output: Outputs, session: Session):
 
     @render.ui
     def _organizations():
-        orgas = [x["name"] for x in instance.kind.get_organizations()]
+        orgas = [x["name"] for x in instance.get_organizations()]
         return (
             ui.input_selectize(
                 "organization",
@@ -92,8 +92,8 @@ def app_server(input: Inputs, output: Outputs, session: Session):
     @render.ui
     def debug():
         dbg = [
-            instance.kind.get_organizations().__str__(),
-            instance.kind.__str__(),
+            instance.get_organizations().__str__(),
+            instance.__str__(),
         ]
         return ui.span("debug"), ui.pre("\n- ".join(dbg))
 

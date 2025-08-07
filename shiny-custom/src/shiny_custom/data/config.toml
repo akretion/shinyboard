@@ -1,3 +1,18 @@
 [data_source]
 name = "odoo"
-models = ["sale.order", "purchase.order"]
+[df]
+sales = {model="sale.order", fields=["name", "id"]}
+sale_products = {model="sale.order.line", fields=["name", "id"]}
+purchase_products = {model="purchase.order.line"}
+leads = {model="crm.lead"}
+[domain]
+Ventes = ["sales", "sale_products"]
+Achats = ["purchase_products"]
+Crm = ["leads"]
+Toto = "a"
+[layout]
+[layout.Ventes]
+"Cmd de Ventes"={output="gt", src="df.sales", fields=["name", "id"]}
+"Produits vendus"={output="df", src="df.sale_products", fields=["name", "id"], unfields=["any"]}
+[layout.Achats]
+Achats={output="df", src="purchase.order", fields=["name", "id"]}

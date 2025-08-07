@@ -11,11 +11,11 @@
     - [Automatic Install ⚡](#automatic-install-)
 
 
-## Requirements 
+## Requirements
 
 ## Launching the app 🚀
 ```bash
-# 
+#
 cd shinyboard
 ./db2kpi.sh --open # opens the browser automatically
 ```
@@ -28,7 +28,7 @@ use this command if you need help on the available options (look at them, they c
 
 
 ## Installing Packages 📦
-- The app is supposed to be, when just installed, in its most barebone state : nothing is installed by default. You decide what's needed and install it whenever, which allows you to make **your** version of the app by installing what **you** want. 
+- The app is supposed to be, when just installed, in its most barebone state : nothing is installed by default. You decide what's needed and install it whenever, which allows you to make **your** version of the app by installing what **you** want.
 A module in our application is an unit of functionnality (represented by one or more dedicated pages).
 There are 2 ways to install packages : manually and automatically. By default it set to manual, (set in `shinyboard/db-to-kpi/config.toml` at the top of the `[APP_CONFIG]` section by the install variable) Here are the two ways, explained
 

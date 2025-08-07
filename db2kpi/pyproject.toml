@@ -1,6 +1,6 @@
 [project]
 name = "db2kpi"
-version = "0.1.0"
+version = "0.2.0"
 description = "Extract data from database to create KPI dashboards"
 readme = "README.md"
 authors = [
@@ -13,13 +13,14 @@ dependencies = [
     # "peewee",
     "plotly",
     "polars",
-    "psycopg3",
+    "psycopg",
     "seaborn",
     "shiny",
     "shinywidgets",
     "pyarrow",
     "connectorx",
     # "sqlglot",
+    "pg-autojoin",
 ]
 [project.optional-dependencies]
 test = [
@@ -28,3 +29,6 @@ test = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.uv.sources]
+pg-autojoin = { git = "https://github.com/bealdav/pg-autojoin.git", rev = "main" }

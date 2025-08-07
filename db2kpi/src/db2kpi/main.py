@@ -1,6 +1,6 @@
 """
 TODO
-- filters: dates, companies
+- sources:
 """
 
 from dataclasses import dataclass
@@ -15,9 +15,9 @@ class Instance:
     # Data Source Name, usually a connection string
     dsn: str
     # List of models or table to be used
-    models: list
+    domain: list
     conn: db_connect.DbConnect = False
-    # Odoo metadata for the particular case where it's an Odoo database
+    # App metadata are stored here according to the kind of app
     kind: object = False
 
     def connect(self):
@@ -27,10 +27,10 @@ class Instance:
                 self.conn = conn
         return self.conn
 
-    def plug_app(self, data):
+    def plug_application(self, data):
         if self.name == "odoo":
             self.kind = get_kind_object(self.name)(
-                conn=self.conn, data=data.get("odoo")
+                conn=self.conn, data=data.get("odoo"), instance=self
             )
 
 
@@ -38,10 +38,11 @@ def main():
     data = config.load()
     source = data["data_source"]
     dsn = data["dsn"]["main"]
-    inst = Instance(name=source["name"], dsn=dsn, models=source["models"])
+    inst = Instance(name=source["name"], dsn=dsn, domain=data["domain"].keys())
     inst.connect()
-    inst.plug_app(data)
+    inst.plug_application(data)
     inst.kind.get_logins()
+    # inst.kind.get_tables()
     return inst
 
 

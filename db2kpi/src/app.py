@@ -16,14 +16,14 @@ app_ui = ui.page_fillable(
         ui.card_header("Kpi"),
         ui.layout_sidebar(
             ui.sidebar(
-                "Settings",
-                ui.output_ui("_data_source"),
+                "",
+                # ui.output_ui("_data_source"),
                 ui.output_ui("_organizations"),
                 ui.output_ui("_date_range"),
                 # ui.output_ui("debug"),
                 bg="#f8f8f8",
             ),
-            "Content",
+            ui.output_ui("_navset_tab"),
         ),
     ),
     ui.include_css(app_css),
@@ -33,11 +33,17 @@ app_ui = ui.page_fillable(
 def app_server(input: Inputs, output: Outputs, session: Session):
 
     @render.ui
+    def _navset_tab():
+        panels = [ui.nav_panel(x, x) for x in instance.domain]
+        # https://shiny.posit.co/py/layouts/navbars/#navbar-at-top
+        return ui.navset_tab(*panels, id="tab")
+
+    @render.ui
     def _data_source():
         return ui.input_radio_buttons(
             "df_radio_buttons",
             ui.div(ui.span(_("Sources"))),
-            instance.models,
+            instance.source,
         )
 
     @render.ui
